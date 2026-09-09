@@ -1,11 +1,17 @@
-import { createContext, ReactNode, useContext, useMemo, useState } from 'react';
+import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
+import { secureStorage } from '../../services/secureStorage';
 import en from './locales/en.json';
 import fr from './locales/fr.json';
 
 const translations = { en, fr } as const;
+const LOCALE_STORAGE_KEY = 'BOOKLIST_LOCALE';
 
 export type Locale = keyof typeof translations;
+
+function isLocale(value: string | null): value is Locale {
+  return value !== null && value in translations;
+}
 
 type I18nContextValue = {
   locale: Locale;
@@ -16,7 +22,20 @@ type I18nContextValue = {
 const I18nContext = createContext<I18nContextValue | undefined>(undefined);
 
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocale] = useState<Locale>('fr');
+  const [locale, setLocaleState] = useState<Locale>('fr');
+  
+  useEffect(() => {
+    void secureStorage.getSecureItem(LOCALE_STORAGE_KEY).then((stored) => {
+      if (isLocale(stored)) {
+        setLocaleState(stored);
+      }
+    });
+  }, []);
+
+  const setLocale = useCallback((next: Locale) => {
+    setLocaleState(next);
+    void secureStorage.setSecureItem(LOCALE_STORAGE_KEY, next);
+  }, []);
 
   const value = useMemo<I18nContextValue>(
     () => ({
@@ -32,7 +51,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
         return typeof result === 'string' ? result : key;
       },
     }),
-    [locale],
+    [locale, setLocale],
   );
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;

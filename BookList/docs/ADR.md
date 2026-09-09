@@ -177,6 +177,10 @@ Le theme s'applique a toute l'application depuis deux points centraux, jamais ec
 
 Regle : aucun ecran ni composant metier n'appelle `useTheme` pour poser des couleurs inline. Si un besoin de style theme se repete, on cree ou etend une primitive dans `components/ui/`.
 
+### Persistance des preferences
+
+La langue (`BOOKLIST_LOCALE`) et le theme (`BOOKLIST_THEME_MODE`) sont persistes via `services/secureStorage.ts`, la meme abstraction cle-valeur que l'authentification (localStorage en navigateur, memoire en tests). Chaque provider restaure la valeur stockee au demarrage puis ecrit a chaque changement.
+
 ## Consequences
 
 ### Positives
@@ -190,7 +194,7 @@ Regle : aucun ecran ni composant metier n'appelle `useTheme` pour poser des coul
 
 - Les primitives `components/ui/` doivent etre etendues au fil des besoins (boutons, champs de saisie...).
 - Le `t()` maison ne gere ni pluriels ni interpolation ; passer a i18next si ce besoin apparait.
-- La langue et le theme choisis ne sont pas encore persistes ; a brancher sur `services/storage.ts` au lot 4.
+- Les dates et nombres ne sont pas encore formates selon la locale (`Intl`).
 
 ### A revoir si
 
