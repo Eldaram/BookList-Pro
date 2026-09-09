@@ -1,21 +1,33 @@
 {
   "name": "booklist",
   "version": "1.0.0",
-  "main": "index.ts",
+  "main": "expo-router/entry",
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "lint": "eslint .",
+    "prepare": "husky"
   },
   "dependencies": {
+    "@expo/metro-runtime": "~6.1.2",
+    "eslint-config-expo": "~10.0.0",
     "expo": "~54.0.36",
+    "expo-router": "~6.0.24",
     "expo-status-bar": "~3.0.9",
     "react": "19.1.0",
-    "react-native": "0.81.5"
+    "react-dom": "19.1.0",
+    "react-native": "0.81.5",
+    "react-native-web": "^0.21.0"
   },
   "devDependencies": {
+    "@commitlint/cli": "^21.2.2",
+    "@commitlint/config-conventional": "^21.2.2",
     "@types/react": "~19.1.0",
+    "eslint": "^9.39.5",
+    "eslint-config-expo": "^57.0.2",
+    "husky": "^9.1.7",
     "typescript": "~5.9.2"
   },
   "private": true
