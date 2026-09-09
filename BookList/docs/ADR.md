@@ -166,6 +166,8 @@ app/
 
 `I18nProvider` porte la langue courante (`fr` par defaut) et expose `t('cle.imbriquee')` avec repli sur la cle si la traduction est absente. Les traductions sont des fichiers JSON par langue dans `features/i18n/locales/`. Le selecteur de langue est un composant d'interface pure qui consomme le hook, sans etat propre.
 
+Le hook expose aussi `formatDate` et `formatNumber`, bases sur `Intl` avec la locale courante (`fr-FR` / `en-GB`). Les composants n'instancient jamais `Intl` eux-memes : tout affichage de date ou de nombre passe par ces fonctions et se readapte automatiquement au changement de langue.
+
 ### Theme
 
 Les palettes clair et sombre sont des tokens purs dans `theme/tokens.ts`. `ThemeProvider` porte le mode courant (clair par defaut) et expose `colors` et `toggleTheme`.
@@ -194,7 +196,6 @@ La langue (`BOOKLIST_LOCALE`) et le theme (`BOOKLIST_THEME_MODE`) sont persistes
 
 - Les primitives `components/ui/` doivent etre etendues au fil des besoins (boutons, champs de saisie...).
 - Le `t()` maison ne gere ni pluriels ni interpolation ; passer a i18next si ce besoin apparait.
-- Les dates et nombres ne sont pas encore formates selon la locale (`Intl`).
 
 ### A revoir si
 

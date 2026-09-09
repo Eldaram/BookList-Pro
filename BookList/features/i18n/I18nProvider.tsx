@@ -7,6 +7,8 @@ import fr from './locales/fr.json';
 const translations = { en, fr } as const;
 const LOCALE_STORAGE_KEY = 'BOOKLIST_LOCALE';
 
+const intlLocales = { fr: 'fr-FR', en: 'en-GB' } as const;
+
 export type Locale = keyof typeof translations;
 
 function isLocale(value: string | null): value is Locale {
@@ -17,13 +19,15 @@ type I18nContextValue = {
   locale: Locale;
   setLocale: (locale: Locale) => void;
   t: (key: string) => string;
+  formatDate: (date: Date | number | string, options?: Intl.DateTimeFormatOptions) => string;
+  formatNumber: (value: number, options?: Intl.NumberFormatOptions) => string;
 };
 
 const I18nContext = createContext<I18nContextValue | undefined>(undefined);
 
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>('fr');
-  
+
   useEffect(() => {
     void secureStorage.getSecureItem(LOCALE_STORAGE_KEY).then((stored) => {
       if (isLocale(stored)) {
@@ -50,6 +54,11 @@ export function I18nProvider({ children }: { children: ReactNode }) {
           );
         return typeof result === 'string' ? result : key;
       },
+      formatDate: (date, options) =>
+        new Intl.DateTimeFormat(intlLocales[locale], options ?? { dateStyle: 'medium' }).format(
+          new Date(date),
+        ),
+      formatNumber: (num, options) => new Intl.NumberFormat(intlLocales[locale], options).format(num),
     }),
     [locale, setLocale],
   );
