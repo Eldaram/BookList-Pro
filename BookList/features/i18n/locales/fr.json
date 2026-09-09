@@ -1,0 +1,20 @@
+{
+  "app": {
+    "title": "BookList Pro",
+    "subtitle": "Catalogue des livres"
+  },
+  "tabs": {
+    "books": "Livres"
+  },
+  "language": {
+    "label": "Choisir la langue",
+    "fr": "🇫🇷 Français",
+    "en": "🇬🇧 English"
+  },
+  "books": {
+    "empty": "Aucun livre pour le moment",
+    "loading": "Chargement des livres…",
+    "error": "Impossible de charger les livres",
+    "retry": "Réessayer"
+  }
+}
