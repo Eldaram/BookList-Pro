@@ -40,6 +40,27 @@ function mapApiAuthReason(serverReason?: string): AuthReason {
   }
 }
 
+export { mapApiAuthReason };
+
+type ApiErrorPayload = {
+  erreur?: string;
+  message?: string;
+  serveur?: unknown;
+  versionAttendue?: number;
+  champs?: Record<string, string>;
+};
+
+function isAppError(err: unknown): err is AppError {
+  return (
+    typeof err === 'object' &&
+    err !== null &&
+    'type' in err &&
+    ['AUTH', 'VALIDATION', 'CONFLICT', 'SERVER', 'NETWORK'].includes(
+      (err as { type: string }).type,
+    )
+  );
+}
+
 class HttpClient {
   async request<T>(endpoint: string, options: RequestOptions<T> = {}): Promise<T> {
     const {
@@ -93,7 +114,7 @@ class HttpClient {
           if (schema) {
             try {
               return schema.parse(json);
-            } catch (err: any) {
+            } catch {
               throw {
                 type: 'VALIDATION',
                 fields: { schema: 'Response payload structure mismatch.' },
@@ -105,7 +126,7 @@ class HttpClient {
         }
 
         // Handle error status responses
-        let errorData: any = {};
+        let errorData: ApiErrorPayload = {};
         try {
           errorData = await response.json();
         } catch {
@@ -201,10 +222,10 @@ class HttpClient {
           message: errorData.message || `Server error (${status}).`,
         } satisfies ServerError;
 
-      } catch (err: any) {
+      } catch (err) {
         // Re-throw typed domain errors
-        if (err.type && ['AUTH', 'VALIDATION', 'CONFLICT', 'SERVER', 'NETWORK'].includes(err.type)) {
-          throw err satisfies AppError;
+        if (isAppError(err)) {
+          throw err;
         }
 
         // Retry on network failures if attempts remain
@@ -216,7 +237,7 @@ class HttpClient {
 
         throw {
           type: 'NETWORK',
-          message: err.message || 'Network connection failure.',
+          message: err instanceof Error && err.message ? err.message : 'Network connection failure.',
           cause: err,
         } satisfies NetworkError;
       }
