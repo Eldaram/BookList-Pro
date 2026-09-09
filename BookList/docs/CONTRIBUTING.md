@@ -31,12 +31,20 @@ Ajouter ou mettre a jour les tests des que la fonctionnalite dispose de logique 
 
 Utiliser des commits petits, atomiques et avec un prefixe conventionnel :
 
+Le hook Git `commit-msg` bloque automatiquement les messages qui ne respectent pas cette convention.
+
 ```text
 feat: add book list layout
 fix: handle invalid publication year
 test: cover book form validation
 docs: document project setup
 refactor: isolate API error mapping
+```
+
+Pour tester un message sans creer de commit :
+
+```bash
+echo "feat: add book list layout" | npx commitlint
 ```
 
 Ouvrir une pull request avec :
