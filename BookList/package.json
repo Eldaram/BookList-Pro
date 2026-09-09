@@ -8,6 +8,7 @@
     "ios": "expo start --ios",
     "web": "expo start --web",
     "lint": "eslint .",
+    "test": "jest",
     "prepare": "husky"
   },
   "dependencies": {
@@ -19,15 +20,19 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-native": "0.81.5",
-    "react-native-web": "^0.21.0"
+    "react-native-web": "^0.21.0",
+    "zod": "^4.5.4"
   },
   "devDependencies": {
     "@commitlint/cli": "^21.2.2",
     "@commitlint/config-conventional": "^21.2.2",
+    "@types/jest": "^30.0.0",
     "@types/react": "~19.1.0",
     "eslint": "^9.39.5",
     "eslint-config-expo": "^57.0.2",
     "husky": "^9.1.7",
+    "jest": "^30.5.1",
+    "ts-jest": "^29.4.12",
     "typescript": "~5.9.2"
   },
   "private": true

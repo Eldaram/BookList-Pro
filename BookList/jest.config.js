@@ -1,0 +1,12 @@
+process.env.EXPO_PUBLIC_API_URL = 'http://localhost:3000';
+
+/** @type {import('ts-jest').JestConfigWithTsJest} */
+module.exports = {
+  preset: 'ts-jest',
+  testEnvironment: 'node',
+  testMatch: ['**/__tests__/**/*.test.ts'],
+  transform: {
+    '^.+\\.tsx?$': ['ts-jest', { tsconfig: 'tsconfig.json' }],
+  },
+  moduleFileExtensions: ['ts', 'js', 'json', 'node'],
+};
