@@ -1,4 +1,5 @@
-process.env.EXPO_PUBLIC_API_URL = 'http://localhost:3000';
+// Automatically load environment variables strictly from the user's local .env file
+require('dotenv').config();
 
 /** @type {import('ts-jest').JestConfigWithTsJest} */
 module.exports = {
