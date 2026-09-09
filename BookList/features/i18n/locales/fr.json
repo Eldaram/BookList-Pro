@@ -11,6 +11,9 @@
     "fr": "🇫🇷 Français",
     "en": "🇬🇧 English"
   },
+  "theme": {
+    "toggle": "Changer de thème"
+  },
   "books": {
     "empty": "Aucun livre pour le moment",
     "loading": "Chargement des livres…",
