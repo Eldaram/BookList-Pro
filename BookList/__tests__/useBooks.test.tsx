@@ -1,7 +1,7 @@
 import { booksList } from "../features/books/booksList";
-import { bookRepository } from "../services/repository/bookRepository";
+import { bookRepository } from "../services/servicesImpl/bookServiceImpl";
 
-jest.mock("../services/repository/bookRepository");
+jest.mock("../services/servicesImpl/bookServiceImpl");
 
 describe("Books Pagination Feature Suite", () => {
   beforeEach(() => {
