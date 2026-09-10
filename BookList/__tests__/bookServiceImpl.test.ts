@@ -1,9 +1,9 @@
-import { bookRepository } from "../services/servicesImpl/bookServiceImpl";
+import { bookServiceImpl } from "../services/servicesImpl/bookServiceImpl";
 import { booksApi } from "../services/api/booksApi";
 
 jest.mock("../services/api/booksApi");
 
-describe("BookRepository Suite", () => {
+describe("BookServiceImpl Suite", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -18,7 +18,7 @@ describe("BookRepository Suite", () => {
     };
     (booksApi.getBooks as jest.Mock).mockResolvedValue(mockPaginated);
 
-    const result = await bookRepository.getBooks({ page: 1, q: "Dune" });
+    const result = await bookServiceImpl.getBooks({ page: 1, q: "Dune" });
 
     expect(booksApi.getBooks).toHaveBeenCalledWith({ page: 1, q: "Dune" });
     expect(result).toEqual(mockPaginated);
@@ -49,7 +49,7 @@ describe("BookRepository Suite", () => {
       annee: 1954,
     };
 
-    const result = await bookRepository.createBook(input);
+    const result = await bookServiceImpl.createBook(input);
 
     expect(booksApi.createBook).toHaveBeenCalledWith(input);
     expect(result).toEqual(mockBook);

@@ -11,7 +11,7 @@ import {
  * Serves as the single point of contact for the application when performing book operations.
  * Designed to support offline mutation queuing, caching, and persistence.
  */
-class BookRepository {
+class BookServiceImpl {
   async getBooks(filters: BookFilters = {}): Promise<PaginatedBooks> {
     return booksApi.getBooks(filters);
   }
@@ -41,4 +41,4 @@ class BookRepository {
   }
 }
 
-export const bookRepository = new BookRepository();
+export const bookServiceImpl = new BookServiceImpl();
