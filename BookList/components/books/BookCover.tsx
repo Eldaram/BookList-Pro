@@ -5,11 +5,12 @@ import { resolveCoverUri } from "../../services/servicesImpl/coverServiceImpl";
 
 type Props = {
   uri: string | null;
+  fallbackUri?: string | null;
 };
 
-export default function BookCover({ uri }: Props) {
+export default function BookCover({ uri, fallbackUri }: Props) {
   const { colors } = useTheme();
-  const resolved = resolveCoverUri(uri);
+  const resolved = resolveCoverUri(uri) ?? resolveCoverUri(fallbackUri);
   if (!resolved) {
     return (
       <View

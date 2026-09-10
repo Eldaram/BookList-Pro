@@ -20,7 +20,10 @@ describe("BookServiceImpl Suite", () => {
 
     const result = await bookServiceImpl.getBooks({ page: 1, q: "Dune" });
 
-    expect(booksApi.getBooks).toHaveBeenCalledWith({ page: 1, q: "Dune" });
+    expect(booksApi.getBooks).toHaveBeenCalledWith(
+      { page: 1, q: "Dune" },
+      undefined,
+    );
     expect(result).toEqual(mockPaginated);
   });
 

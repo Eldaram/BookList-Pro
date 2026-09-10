@@ -44,6 +44,9 @@
       "add": "Add to favorites",
       "remove": "Remove from favorites"
     },
+    "openLibrary": {
+      "editions": "{{count}} edition(s) referenced on OpenLibrary"
+    },
     "read": {
       "read": "Read",
       "notRead": "Not read",

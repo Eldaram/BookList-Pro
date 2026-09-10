@@ -44,6 +44,9 @@
       "add": "Ajouter aux coups de cœur",
       "remove": "Retirer des coups de cœur"
     },
+    "openLibrary": {
+      "editions": "{{count}} édition(s) référencée(s) sur OpenLibrary"
+    },
     "read": {
       "read": "Lu",
       "notRead": "Non lu",
