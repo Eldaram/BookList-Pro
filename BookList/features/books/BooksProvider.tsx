@@ -70,8 +70,6 @@ export function BooksProvider({ children }: { children: React.ReactNode }) {
 
   const filtersRef = useRef<BookListFilters>({});
   const abortRef = useRef<AbortController | null>(null);
-
-  // Sync state to refs for stable async callbacks
   const pageRef = useRef(page);
   const hasMoreRef = useRef(hasMore);
   const loadingRef = useRef(loading);
@@ -92,6 +90,8 @@ export function BooksProvider({ children }: { children: React.ReactNode }) {
 
   const setFilters = useCallback((patch: Partial<BookListFilters>) => {
     setScrollOffsetState(0);
+    setLoading(true);
+    setError(null);
     setFiltersState((prev) => ({ ...prev, ...patch }));
   }, []);
 
@@ -112,7 +112,6 @@ export function BooksProvider({ children }: { children: React.ReactNode }) {
     setHasMore(response.page < response.totalPages);
   }, []);
 
-  // Reflete les patchs du cache (toggle favori optimiste, fiche detail) dans la liste
   useEffect(() => {
     return subscribeBooksCache(() => {
       const cached = getCachedBooks();
@@ -124,12 +123,12 @@ export function BooksProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   // Annule la requete precedente : seule la derniere recherche fait foi.
+  // Les etats loading/error sont poses par setFilters (ou l'etat initial),
+  // jamais de facon synchrone ici : l'effet ne fait que lancer la requete.
   const loadInitialBooks = useCallback(async () => {
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
-    setLoading(true);
-    setError(null);
     try {
       const response = await booksList.getBooks(
         { page: 1, limit: DEFAULT_LIMIT, ...filtersRef.current },
@@ -137,6 +136,7 @@ export function BooksProvider({ children }: { children: React.ReactNode }) {
       );
       if (controller.signal.aborted) return;
       applyPage(response, false);
+      setError(null);
     } catch (err) {
       if (!controller.signal.aborted) setError(toAppError(err));
     } finally {
