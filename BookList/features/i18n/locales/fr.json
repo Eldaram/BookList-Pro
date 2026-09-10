@@ -20,7 +20,17 @@
     "empty": "Aucun livre pour le moment",
     "loading": "Chargement des livres…",
     "error": "Impossible de charger les livres",
-    "retry": "Réessayer"
+    "retry": "Réessayer",
+    "delete": {
+      "action": "Supprimer le livre",
+      "confirmTitle": "Supprimer cet ouvrage ?",
+      "confirmMessage": "Cette action sera définitive après un délai de 5 secondes.",
+      "confirm": "Supprimer",
+      "cancel": "Annuler",
+      "pending": "Suppression dans {{seconds}} s…",
+      "undo": "Annuler",
+      "error": "Impossible de supprimer ce livre."
+    }
   },
   "form": {
     "createTitle": "Ajouter un livre",
