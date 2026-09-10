@@ -120,7 +120,11 @@ export default function BookForm({ mode, book }: Props) {
               accessibilityRole="button"
               accessibilityLabel={t("form.cover.reset")}
             >
-              <MaterialIcons name="close" size={18} color={colors.textOnPrimary} />
+              <MaterialIcons
+                name="close"
+                size={18}
+                color={colors.textOnPrimary}
+              />
             </TouchableOpacity>
           )}
           {(coverError || fieldError("couverture")) && (
