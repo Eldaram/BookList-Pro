@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { useFocusEffect } from "expo-router";
 import { Book } from "../domain/book";
 import { AppError, isAppError } from "../domain/error";
 import { booksList } from "../features/books/booksList";
@@ -23,31 +24,34 @@ export function useBook(id: string | undefined) {
 
   useEffect(() => {
     if (!id) return;
-
     return subscribeBooksCache(() => {
-      setBook(getCachedBook(id));
+      setBook(getCachedBook(id) ?? null);
     });
   }, [id]);
 
-  useEffect(() => {
+  const fetchBook = useCallback(async () => {
     if (!id) return;
-    const fetchBook = async () => {
-      try {
-        const freshBook = await booksList.getBookById(id);
-        upsertCachedBook(freshBook);
-        setError(null);
-      } catch (err) {
-        setError(
-          isAppError(err)
-            ? err
-            : { type: "NETWORK", message: "Unexpected error", cause: err },
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchBook();
+    try {
+      const freshBook = await booksList.getBookById(id);
+      upsertCachedBook(freshBook);
+      setBook(freshBook);
+      setError(null);
+    } catch (err) {
+      setError(
+        isAppError(err)
+          ? err
+          : { type: "NETWORK", message: "Unexpected error", cause: err },
+      );
+    } finally {
+      setLoading(false);
+    }
   }, [id]);
+
+  useFocusEffect(
+    useCallback(() => {
+      void fetchBook();
+    }, [fetchBook]),
+  );
 
   const toggleFavorite = useCallback(() => {
     if (!book) return;
@@ -59,5 +63,12 @@ export function useBook(id: string | undefined) {
     toggleBookLu(book);
   }, [book]);
 
-  return { book, loading, error, toggleFavorite, toggleRead };
+  return {
+    book,
+    loading,
+    error,
+    refetch: fetchBook,
+    toggleFavorite,
+    toggleRead,
+  };
 }

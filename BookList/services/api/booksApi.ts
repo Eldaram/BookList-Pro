@@ -37,9 +37,13 @@ class BooksApi {
   }
 
   async createBook(input: BookInput): Promise<Book> {
+    const body = {
+      ...input,
+      couverture: input.couverture ?? undefined,
+    };
     return httpClient.request<Book>("/books", {
       method: "POST",
-      body: input,
+      body,
       schema: bookSchema,
     });
   }
@@ -54,20 +58,35 @@ class BooksApi {
       headers["If-Match"] = String(expectedVersion);
     }
 
+    const body = {
+      ...input,
+      couverture: input.couverture ?? "",
+    };
+
     return httpClient.request<Book>(`/books/${id}`, {
       method: "PUT",
       headers,
-      body: input,
+      body,
       schema: bookSchema,
     });
   }
 
   async patchBook(id: string, patch: Partial<BookInput>): Promise<Book> {
+    const body = {
+      ...patch,
+      ...(patch.couverture !== undefined && {
+        couverture: patch.couverture ?? "",
+      }),
+    };
     return httpClient.request<Book>(`/books/${id}`, {
       method: "PATCH",
-      body: patch,
+      body,
       schema: bookSchema,
     });
+  }
+
+  async updateBookCover(id: string, coverUrl: string | null): Promise<Book> {
+    return this.patchBook(id, { couverture: coverUrl });
   }
 
   async deleteBook(id: string): Promise<void> {
