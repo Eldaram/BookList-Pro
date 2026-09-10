@@ -1,13 +1,13 @@
 export const palettes = {
   light: {
-    background: '#ffffff',
-    text: '#0f172a',
-    textMuted: '#475569',
+    background: "#ffffff",
+    text: "#0f172a",
+    textMuted: "#475569",
   },
   dark: {
-    background: '#0f172a',
-    text: '#f8fafc',
-    textMuted: '#94a3b8',
+    background: "#0f172a",
+    text: "#f8fafc",
+    textMuted: "#94a3b8",
   },
 } as const;
 

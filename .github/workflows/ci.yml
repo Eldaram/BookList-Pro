@@ -1,0 +1,58 @@
+name: BookList CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+permissions:
+  contents: read
+
+jobs:
+  booklist-ci:
+    name: BookList Quality, Tests & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: BookList/package-lock.json
+
+      - name: Install API dependencies
+        working-directory: api-books-v2
+        run: npm install
+
+      - name: Seed API test data
+        working-directory: api-books-v2
+        run: mkdir -p data && npm run seed
+
+      - name: Install BookList dependencies
+        working-directory: BookList
+        run: npm ci
+
+      - name: Check code formatting (Prettier)
+        working-directory: BookList
+        run: npx prettier --check .
+
+      - name: Typecheck TypeScript
+        working-directory: BookList
+        run: npm run typecheck
+
+      - name: Run Jest test suite
+        working-directory: BookList
+        env:
+          EXPO_PUBLIC_API_URL: http://localhost:3000
+          EXPO_PUBLIC_ADMIN_USERNAME: editeur@booklist.fr
+          EXPO_PUBLIC_ADMIN_PASSWORD: editeur123
+        run: npm test
+
+      - name: Build BookList application
+        working-directory: BookList
+        run: npm run build

@@ -1,6 +1,6 @@
-import { z } from 'zod';
+import { z } from "zod";
 
-export const userRoleSchema = z.enum(['editeur', 'lecteur']);
+export const userRoleSchema = z.enum(["editeur", "lecteur"]);
 
 export const userSchema = z.object({
   id: z.string(),

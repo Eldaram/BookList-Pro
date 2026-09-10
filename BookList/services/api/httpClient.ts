@@ -1,6 +1,6 @@
-import { z } from 'zod';
-import { API_CONFIG } from '../config';
-import { authService } from '../auth/authService';
+import { z } from "zod";
+import { API_CONFIG } from "../config";
+import { authService } from "../auth/authService";
 import {
   AppError,
   AuthError,
@@ -9,10 +9,10 @@ import {
   NetworkError,
   ServerError,
   ValidationError,
-} from '../../domain/error';
+} from "../../domain/error";
 
 export type RequestOptions<T> = {
-  method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   headers?: Record<string, string>;
   body?: unknown;
   schema?: z.ZodSchema<T>;
@@ -26,31 +26,37 @@ async function sleep(ms: number): Promise<void> {
 }
 
 function mapApiAuthReason(serverReason?: unknown): AuthReason {
-  if (typeof serverReason !== 'string') return 'token_invalid';
+  if (typeof serverReason !== "string") return "token_invalid";
   switch (serverReason) {
-    case 'jeton_absent':
-      return 'token_missing';
-    case 'jeton_expire':
-      return 'token_expired';
-    case 'jeton_invalide':
-      return 'token_invalid';
-    case 'droits_insuffisants':
-      return 'insufficient_permissions';
+    case "jeton_absent":
+      return "token_missing";
+    case "jeton_expire":
+      return "token_expired";
+    case "jeton_invalide":
+      return "token_invalid";
+    case "droits_insuffisants":
+      return "insufficient_permissions";
     default:
-      return 'token_invalid';
+      return "token_invalid";
   }
 }
 
 function isAppError(err: unknown): err is AppError {
-  if (typeof err !== 'object' || err === null) return false;
+  if (typeof err !== "object" || err === null) return false;
   const type = (err as { type?: string }).type;
-  return typeof type === 'string' && ['AUTH', 'VALIDATION', 'CONFLICT', 'SERVER', 'NETWORK'].includes(type);
+  return (
+    typeof type === "string" &&
+    ["AUTH", "VALIDATION", "CONFLICT", "SERVER", "NETWORK"].includes(type)
+  );
 }
 
 class HttpClient {
-  async request<T>(endpoint: string, options: RequestOptions<T> = {}): Promise<T> {
+  async request<T>(
+    endpoint: string,
+    options: RequestOptions<T> = {},
+  ): Promise<T> {
     const {
-      method = 'GET',
+      method = "GET",
       headers = {},
       body,
       schema,
@@ -59,17 +65,19 @@ class HttpClient {
       timeoutMs = API_CONFIG.defaultTimeoutMs,
     } = options;
 
-    const fullUrl = endpoint.startsWith('http') ? endpoint : `${API_CONFIG.baseUrl}${endpoint}`;
+    const fullUrl = endpoint.startsWith("http")
+      ? endpoint
+      : `${API_CONFIG.baseUrl}${endpoint}`;
 
     const requestHeaders: Record<string, string> = {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       ...headers,
     };
 
     if (!skipAuth) {
       const token = authService.getAccessToken();
       if (token) {
-        requestHeaders['Authorization'] = `Bearer ${token}`;
+        requestHeaders["Authorization"] = `Bearer ${token}`;
       }
     }
 
@@ -102,9 +110,9 @@ class HttpClient {
               return schema.parse(json);
             } catch {
               throw {
-                type: 'VALIDATION',
-                fields: { schema: 'Response payload structure mismatch.' },
-                message: 'Server response does not match expected schema.',
+                type: "VALIDATION",
+                fields: { schema: "Response payload structure mismatch." },
+                message: "Server response does not match expected schema.",
               } satisfies ValidationError;
             }
           }
@@ -120,17 +128,18 @@ class HttpClient {
         }
 
         const status = response.status;
-        const errorMessage = typeof errorData.message === 'string' ? errorData.message : undefined;
+        const errorMessage =
+          typeof errorData.message === "string" ? errorData.message : undefined;
 
         // 401 Unauthorized
         if (status === 401) {
           const rawError = errorData.erreur;
 
           // Attempt transparent token refresh on token expiration
-          if (rawError === 'jeton_expire' && !skipAutoRefresh) {
+          if (rawError === "jeton_expire" && !skipAutoRefresh) {
             try {
               const newToken = await authService.refreshTokens();
-              requestHeaders['Authorization'] = `Bearer ${newToken}`;
+              requestHeaders["Authorization"] = `Bearer ${newToken}`;
 
               // Retry original request with new token
               const retryResponse = await fetch(fullUrl, {
@@ -146,48 +155,53 @@ class HttpClient {
               }
             } catch {
               throw {
-                type: 'AUTH',
-                reason: 'reconnect_required',
-                message: 'Session expired. Please log in again.',
+                type: "AUTH",
+                reason: "reconnect_required",
+                message: "Session expired. Please log in again.",
               } satisfies AuthError;
             }
           }
 
           throw {
-            type: 'AUTH',
+            type: "AUTH",
             reason: mapApiAuthReason(rawError),
-            message: errorMessage || 'Authentication required.',
+            message: errorMessage || "Authentication required.",
           } satisfies AuthError;
         }
 
         // 403 Forbidden
         if (status === 403) {
           throw {
-            type: 'AUTH',
-            reason: 'insufficient_permissions',
-            message: errorMessage || 'Insufficient permissions for this action.',
+            type: "AUTH",
+            reason: "insufficient_permissions",
+            message:
+              errorMessage || "Insufficient permissions for this action.",
           } satisfies AuthError;
         }
 
         // 409 Conflict (ETag / version mismatch)
         if (status === 409) {
           throw {
-            type: 'CONFLICT',
-            message: errorMessage || 'Version conflict detected.',
+            type: "CONFLICT",
+            message: errorMessage || "Version conflict detected.",
             serverState: errorData.serveur,
-            expectedVersion: typeof errorData.versionAttendue === 'number' ? errorData.versionAttendue : undefined,
+            expectedVersion:
+              typeof errorData.versionAttendue === "number"
+                ? errorData.versionAttendue
+                : undefined,
           } satisfies ConflictError;
         }
 
         // 422 Validation Error
         if (status === 422) {
-          const fields = typeof errorData.champs === 'object' && errorData.champs !== null
-            ? (errorData.champs as Record<string, string>)
-            : {};
+          const fields =
+            typeof errorData.champs === "object" && errorData.champs !== null
+              ? (errorData.champs as Record<string, string>)
+              : {};
           throw {
-            type: 'VALIDATION',
+            type: "VALIDATION",
             fields,
-            message: errorMessage || 'Field validation error.',
+            message: errorMessage || "Field validation error.",
           } satisfies ValidationError;
         }
 
@@ -199,19 +213,18 @@ class HttpClient {
             continue; // Retry loop
           }
           throw {
-            type: 'SERVER',
+            type: "SERVER",
             httpCode: 503,
-            message: 'Service temporarily unavailable.',
+            message: "Service temporarily unavailable.",
           } satisfies ServerError;
         }
 
         // General Server Error
         throw {
-          type: 'SERVER',
+          type: "SERVER",
           httpCode: status,
           message: errorMessage || `Server error (${status}).`,
         } satisfies ServerError;
-
       } catch (err: unknown) {
         // Re-throw typed domain errors
         if (isAppError(err)) {
@@ -225,9 +238,10 @@ class HttpClient {
           continue;
         }
 
-        const msg = err instanceof Error ? err.message : 'Network connection failure.';
+        const msg =
+          err instanceof Error ? err.message : "Network connection failure.";
         throw {
-          type: 'NETWORK',
+          type: "NETWORK",
           message: msg,
           cause: err,
         } satisfies NetworkError;
@@ -235,9 +249,9 @@ class HttpClient {
     }
 
     throw {
-      type: 'SERVER',
+      type: "SERVER",
       httpCode: 503,
-      message: 'Service unavailable.',
+      message: "Service unavailable.",
     } satisfies ServerError;
   }
 }

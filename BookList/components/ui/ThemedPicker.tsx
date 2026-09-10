@@ -1,9 +1,13 @@
-import { Picker, PickerProps } from '@react-native-picker/picker';
-import { Children, cloneElement, isValidElement } from 'react';
+import { Picker, PickerProps } from "@react-native-picker/picker";
+import { Children, cloneElement, isValidElement } from "react";
 
-import { useTheme } from '../../features/theme/ThemeProvider';
+import { useTheme } from "../../features/theme/ThemeProvider";
 
-export default function ThemedPicker<T>({ style, children, ...rest }: PickerProps<T>) {
+export default function ThemedPicker<T>({
+  style,
+  children,
+  ...rest
+}: PickerProps<T>) {
   const { colors } = useTheme();
 
   const items = Children.map(children, (child) =>
@@ -15,7 +19,10 @@ export default function ThemedPicker<T>({ style, children, ...rest }: PickerProp
   return (
     <Picker
       dropdownIconColor={colors.text}
-      style={[{ backgroundColor: colors.background, color: colors.text }, style]}
+      style={[
+        { backgroundColor: colors.background, color: colors.text },
+        style,
+      ]}
       {...rest}
     >
       {items}

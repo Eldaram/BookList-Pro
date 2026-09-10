@@ -1,9 +1,17 @@
-import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import {
+  createContext,
+  ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
-import { secureStorage } from '../../services/secureStorage';
-import { palettes, ThemeColors, ThemeMode } from '../../theme/tokens';
+import { secureStorage } from "../../services/secureStorage";
+import { palettes, ThemeColors, ThemeMode } from "../../theme/tokens";
 
-const THEME_STORAGE_KEY = 'BOOKLIST_THEME_MODE';
+const THEME_STORAGE_KEY = "BOOKLIST_THEME_MODE";
 
 function isThemeMode(value: string | null): value is ThemeMode {
   return value !== null && value in palettes;
@@ -18,7 +26,7 @@ type ThemeContextValue = {
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [mode, setMode] = useState<ThemeMode>('light');
+  const [mode, setMode] = useState<ThemeMode>("light");
 
   useEffect(() => {
     void secureStorage.getSecureItem(THEME_STORAGE_KEY).then((stored) => {
@@ -30,7 +38,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   const toggleTheme = useCallback(() => {
     setMode((m) => {
-      const next = m === 'light' ? 'dark' : 'light';
+      const next = m === "light" ? "dark" : "light";
       void secureStorage.setSecureItem(THEME_STORAGE_KEY, next);
       return next;
     });
@@ -45,13 +53,15 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     [mode, toggleTheme],
   );
 
-  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+  return (
+    <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
+  );
 }
 
 export function useTheme() {
   const ctx = useContext(ThemeContext);
   if (!ctx) {
-    throw new Error('useTheme doit être utilisé dans un ThemeProvider');
+    throw new Error("useTheme doit être utilisé dans un ThemeProvider");
   }
   return ctx;
 }
