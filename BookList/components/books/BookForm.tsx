@@ -1,5 +1,13 @@
 import React, { useState } from "react";
-import { ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { Book } from "../../domain/book";
 import { AppError, isAppError } from "../../domain/error";
@@ -7,6 +15,7 @@ import { booksList } from "../../features/books/booksList";
 import { spacing, typography } from "../../theme/tokens";
 import { useTheme } from "../../features/theme/ThemeProvider";
 import { useI18n } from "../../features/i18n/I18nProvider";
+import { pickCoverImage } from "../../services/repository/coverRepository";
 import SaveButton from "../SaveButton";
 import BookCover from "./BookCover";
 
@@ -25,8 +34,26 @@ export default function BookForm({ mode, book }: Props) {
   const [auteur, setAuteur] = useState(book?.auteur ?? "");
   const [editeur, setEditeur] = useState(book?.editeur ?? "");
   const [annee, setAnnee] = useState(book ? String(book.annee) : "");
-  const [couverture] = useState<string | null>(book?.couverture ?? null);
+  const [couverture, setCouverture] = useState<string | null>(
+    book?.couverture ?? null,
+  );
   const [error, setError] = useState<AppError | null>(null);
+  const [coverError, setCoverError] = useState<string | null>(null);
+
+  const addCover = async () => {
+    setCoverError(null);
+    try {
+      const uri = await pickCoverImage();
+      if (uri) setCouverture(uri);
+    } catch {
+      setCoverError(t("form.cover.error"));
+    }
+  };
+
+  const resetCover = () => {
+    setCoverError(null);
+    setCouverture(null);
+  };
 
   // Messages de validation renvoyes par l'API (422), par champ
   const fieldError = (champ: string) =>
@@ -74,6 +101,33 @@ export default function BookForm({ mode, book }: Props) {
       >
         <View style={styles.coverWrapper}>
           <BookCover uri={couverture} />
+          <TouchableOpacity
+            style={[styles.coverButton, { backgroundColor: colors.primary }]}
+            onPress={addCover}
+            accessibilityRole="button"
+            accessibilityLabel={t("form.cover.add")}
+          >
+            <MaterialIcons name="add" size={22} color={colors.textOnPrimary} />
+          </TouchableOpacity>
+          {couverture && (
+            <TouchableOpacity
+              style={[
+                styles.coverButton,
+                styles.coverResetButton,
+                { backgroundColor: colors.danger },
+              ]}
+              onPress={resetCover}
+              accessibilityRole="button"
+              accessibilityLabel={t("form.cover.reset")}
+            >
+              <MaterialIcons name="close" size={18} color={colors.textOnPrimary} />
+            </TouchableOpacity>
+          )}
+          {(coverError || fieldError("couverture")) && (
+            <Text style={[styles.fieldError, { color: colors.danger }]}>
+              {coverError || fieldError("couverture")}
+            </Text>
+          )}
         </View>
         <View style={styles.info}>
           <Text style={[styles.heading, { color: colors.text }]}>
@@ -170,7 +224,21 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
   },
   coverWrapper: {
+    position: "relative",
     width: 200,
+  },
+  coverButton: {
+    alignItems: "center",
+    borderRadius: 20,
+    bottom: spacing.md,
+    height: 40,
+    justifyContent: "center",
+    position: "absolute",
+    right: spacing.md,
+    width: 40,
+  },
+  coverResetButton: {
+    bottom: spacing.md + 48,
   },
   info: {
     flex: 1,

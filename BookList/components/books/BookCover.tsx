@@ -1,6 +1,7 @@
 import React from "react";
 import { Image, StyleSheet, View } from "react-native";
 import { useTheme } from "../../features/theme/ThemeProvider";
+import { resolveCoverUri } from "../../services/repository/coverRepository";
 
 type Props = {
   uri: string | null;
@@ -8,7 +9,8 @@ type Props = {
 
 export default function BookCover({ uri }: Props) {
   const { colors } = useTheme();
-  if (!uri) {
+  const resolved = resolveCoverUri(uri);
+  if (!resolved) {
     return (
       <View
         style={[
@@ -18,7 +20,9 @@ export default function BookCover({ uri }: Props) {
       />
     );
   }
-  return <Image source={{ uri }} style={styles.cover} resizeMode="cover" />;
+  return (
+    <Image source={{ uri: resolved }} style={styles.cover} resizeMode="cover" />
+  );
 }
 
 const styles = StyleSheet.create({
