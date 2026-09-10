@@ -38,3 +38,12 @@ export type ServerError = {
 
 export type AppError =
   NetworkError | AuthError | ValidationError | ConflictError | ServerError;
+
+export function isAppError(err: unknown): err is AppError {
+  if (typeof err !== "object" || err === null) return false;
+  const type = (err as { type?: string }).type;
+  return (
+    typeof type === "string" &&
+    ["NETWORK", "AUTH", "VALIDATION", "CONFLICT", "SERVER"].includes(type)
+  );
+}

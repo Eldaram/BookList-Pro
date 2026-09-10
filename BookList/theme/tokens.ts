@@ -1,15 +1,25 @@
 export const palettes = {
   light: {
     background: "#ffffff",
+    coverPlaceholder: "#cbd5e1",
+    danger: "#dc2626",
+    primary: "#2563eb",
     text: "#0f172a",
     textMuted: "#475569",
+    textOnPrimary: "#ffffff",
   },
   dark: {
     background: "#0f172a",
+    coverPlaceholder: "#475569",
+    danger: "#f87171",
+    primary: "#60a5fa",
     text: "#f8fafc",
-    textMuted: "#94a3b8",
+    textMuted: "#cbd5e1",
+    textOnPrimary: "#0f172a",
   },
 } as const;
+
+export const colors = palettes.light;
 
 export type ThemeMode = keyof typeof palettes;
 export type ThemeColors = (typeof palettes)[ThemeMode];

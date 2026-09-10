@@ -1,6 +1,6 @@
-import { StyleSheet, View } from "react-native";
-
-import ThemedText from "../../components/ui/ThemedText";
+import { StatusBar } from "expo-status-bar";
+import { StyleSheet, Text, View } from "react-native";
+import BookList from "../../components/books/BookList";
 import { useI18n } from "../../features/i18n/I18nProvider";
 import { spacing, typography } from "../../theme/tokens";
 
@@ -9,10 +9,10 @@ export default function BooksScreen() {
 
   return (
     <View style={styles.container}>
-      <ThemedText style={styles.title}>{t("app.title")}</ThemedText>
-      <ThemedText muted style={styles.subtitle}>
-        {t("app.subtitle")}
-      </ThemedText>
+      <Text style={styles.title}>{t("app.title")}</Text>
+      <Text style={styles.subtitle}>{t("app.subtitle")}</Text>
+      <BookList />
+      <StatusBar style="auto" />
     </View>
   );
 }
