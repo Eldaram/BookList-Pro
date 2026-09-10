@@ -26,6 +26,10 @@ jobs:
         working-directory: api-books-v2
         run: npm install
 
+      - name: Seed API test data
+        working-directory: api-books-v2
+        run: mkdir -p data && npm run seed
+
       - name: Install BookList dependencies
         working-directory: BookList
         run: npm ci
