@@ -15,9 +15,21 @@
     "toggle": "Toggle theme"
   },
   "books": {
+    "details": "Book details",
+    "form": "Book form",
     "empty": "No books yet",
     "loading": "Loading books…",
     "error": "Unable to load books",
     "retry": "Retry"
+  },
+  "form": {
+    "createTitle": "Add a book",
+    "updateTitle": "Edit the book",
+    "title": "Title",
+    "author": "Author",
+    "publisher": "Publisher",
+    "year": "Year",
+    "save": "Save",
+    "unexpectedError": "An unexpected error occurred."
   }
 }

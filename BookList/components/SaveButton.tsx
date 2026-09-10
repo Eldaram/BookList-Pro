@@ -1,23 +1,27 @@
 import React from "react";
 import { TouchableOpacity, Text, StyleSheet } from "react-native";
-import { colors, spacing, typography } from "../theme/tokens";
+import { spacing, typography } from "../theme/tokens";
+import { useTheme } from "../features/theme/ThemeProvider";
 
 export default function SaveButton({
   onPress,
   disabled,
+  label = "Sauvegarder",
 }: {
   onPress: () => void;
   disabled?: boolean;
+  label?: string;
 }) {
+  const { colors } = useTheme();
   return (
     <TouchableOpacity
-      style={[styles.button, disabled && styles.disabled]}
+      style={[styles.button, { backgroundColor: colors.primary }, disabled && styles.disabled]}
       onPress={onPress}
       disabled={disabled}
       accessibilityRole="button"
-      accessibilityLabel="Sauvegarder"
+      accessibilityLabel={label}
     >
-      <Text style={styles.text}>Sauvegarder</Text>
+      <Text style={[styles.text, { color: colors.textOnPrimary }]}>{label}</Text>
     </TouchableOpacity>
   );
 }
@@ -25,7 +29,6 @@ export default function SaveButton({
 const styles = StyleSheet.create({
   button: {
     alignItems: "center",
-    backgroundColor: colors.primary,
     borderRadius: 8,
     justifyContent: "center",
     marginTop: spacing.md,
@@ -35,7 +38,6 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   text: {
-    color: colors.textOnPrimary,
     fontSize: typography.body,
     fontWeight: "700",
   },

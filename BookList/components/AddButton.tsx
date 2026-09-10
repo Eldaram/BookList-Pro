@@ -1,12 +1,14 @@
 import React from "react";
 import { TouchableOpacity, StyleSheet } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import { colors, spacing } from "../theme/tokens";
+import { spacing } from "../theme/tokens";
+import { useTheme } from "../features/theme/ThemeProvider";
 
 export default function AddButton({ onPress }: { onPress: () => void }) {
+  const { colors } = useTheme();
   return (
     <TouchableOpacity
-      style={styles.button}
+      style={[styles.button, { backgroundColor: colors.primary }]}
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel="Ajouter un livre"
@@ -19,7 +21,6 @@ export default function AddButton({ onPress }: { onPress: () => void }) {
 const styles = StyleSheet.create({
   button: {
     alignItems: "center",
-    backgroundColor: colors.primary,
     borderRadius: 24,
     height: 48,
     justifyContent: "center",
