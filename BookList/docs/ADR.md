@@ -122,3 +122,82 @@ L'intercepteur d'authentification sera ajoute a `httpClient.ts`, avec un fournis
 
 - Une autre solution d'etat serveur est retenue et justifiee par ecrit.
 - La synchronisation exige de deplacer une regle de mutation dans `domain/` pour la tester de facon pure.
+
+# ADR 002 - Internationalisation et theme clair/sombre centralises
+
+## Statut
+
+Accepte - 09/09/2026
+
+## Contexte
+
+L'application doit proposer le choix de langue (francais, anglais) et un theme clair ou sombre applicable a toute l'application, avec le clair par defaut. Ces deux besoins sont transverses : chaque ecran affiche des textes traduits et des couleurs dependantes du theme.
+
+Les contraintes de l'ADR 001 s'appliquent : `components/` reste de l'interface pure, la logique et l'etat vivent dans `features/`, et `theme/` ne contient que des tokens sans dependance. Aucune dependance externe n'est necessaire pour le lot 1 : `@react-navigation/native` est deja fourni par expo-router.
+
+## Options envisagees
+
+1. Installer i18next et un gestionnaire de theme externes. Poids et configuration inutiles pour deux langues et deux palettes.
+2. Appeler `useTheme` et poser des couleurs inline (`backgroundColor`, `color`) dans chaque ecran. La logique de theme fuit partout et chaque nouvel ecran doit y penser.
+3. Centraliser : etat dans des providers `features/`, tokens dans `theme/`, application du theme au niveau racine et via des primitives `components/ui/`.
+
+## Decision
+
+Nous retenons l'option 3.
+
+```text
+theme/
+  tokens.ts                   # palettes.light / palettes.dark, spacing, typography (donnees pures)
+features/
+  i18n/I18nProvider.tsx       # contexte langue, hook useI18n() -> { locale, setLocale, t }
+  i18n/locales/fr.json        # traductions par cles imbriquees (app.title, tabs.books, ...)
+  i18n/locales/en.json
+  theme/ThemeProvider.tsx     # contexte theme, hook useTheme() -> { mode, colors, toggleTheme }
+components/
+  i18n/i18n.tsx               # selecteur de langue (UI pure, consomme useI18n)
+  ui/ThemeToggle.tsx          # bouton de bascule clair/sombre
+  ui/ThemedText.tsx           # texte dont la couleur suit le theme (variante muted)
+  ui/ThemedPicker.tsx         # Picker dont fond, texte, fleche et items suivent le theme
+app/
+  _layout.tsx                 # ThemeProvider > I18nProvider > NavigationThemeProvider
+```
+
+### Internationalisation
+
+`I18nProvider` porte la langue courante (`fr` par defaut) et expose `t('cle.imbriquee')` avec repli sur la cle si la traduction est absente. Les traductions sont des fichiers JSON par langue dans `features/i18n/locales/`. Le selecteur de langue est un composant d'interface pure qui consomme le hook, sans etat propre.
+
+Le hook expose aussi `formatDate` et `formatNumber`, bases sur `Intl` avec la locale courante (`fr-FR` / `en-GB`). Les composants n'instancient jamais `Intl` eux-memes : tout affichage de date ou de nombre passe par ces fonctions et se readapte automatiquement au changement de langue.
+
+### Theme
+
+Les palettes clair et sombre sont des tokens purs dans `theme/tokens.ts`. `ThemeProvider` porte le mode courant (clair par defaut) et expose `colors` et `toggleTheme`.
+
+Le theme s'applique a toute l'application depuis deux points centraux, jamais ecran par ecran :
+
+1. `app/_layout.tsx` injecte les couleurs dans `NavigationThemeProvider` : fonds d'ecrans, headers, tab bar et barre d'etat suivent le mode automatiquement.
+2. Les primitives de `components/ui/` (`ThemedText`, `ThemedPicker`) encapsulent les couleurs de texte et de champs. Les ecrans les utilisent a la place des composants bruts.
+
+Regle : aucun ecran ni composant metier n'appelle `useTheme` pour poser des couleurs inline. Si un besoin de style theme se repete, on cree ou etend une primitive dans `components/ui/`.
+
+### Persistance des preferences
+
+La langue (`BOOKLIST_LOCALE`) et le theme (`BOOKLIST_THEME_MODE`) sont persistes via `services/secureStorage.ts`, la meme abstraction cle-valeur que l'authentification (localStorage en navigateur, memoire en tests). Chaque provider restaure la valeur stockee au demarrage puis ecrit a chaque changement.
+
+## Consequences
+
+### Positives
+
+- Un nouvel ecran est traduit et theme sans aucun code de langue ou de couleur : `t()` et primitives suffisent.
+- Aucune dependance externe ajoutee.
+- Les palettes et traductions se modifient en un seul endroit.
+- Le respect des couches de l'ADR 001 est conserve : donnees dans `theme/`, etat dans `features/`, interface dans `components/`.
+
+### Negatives
+
+- Les primitives `components/ui/` doivent etre etendues au fil des besoins (boutons, champs de saisie...).
+- Le `t()` maison ne gere ni pluriels ni interpolation ; passer a i18next si ce besoin apparait.
+
+### A revoir si
+
+- Le nombre de langues ou les besoins de pluralisation imposent i18next.
+- La persistance des preferences utilisateur est introduite au lot 4.
