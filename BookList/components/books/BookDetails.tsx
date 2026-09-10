@@ -8,6 +8,7 @@ import { booksList } from "../../features/books/booksList";
 import { spacing, typography } from "../../theme/tokens";
 import { useTheme } from "../../features/theme/ThemeProvider";
 import FavoriteButton from "../FavoriteButton";
+import ReadStatusToggle from "../ReadStatusToggle";
 import UpdateButton from "../UpdateButton";
 import { useI18n } from "../../features/i18n/I18nProvider";
 import ConfirmDialog from "../ConfirmDialog";
@@ -20,9 +21,14 @@ const UNDO_DELAY_SECONDS = 5;
 type Props = {
   book: Book;
   onToggleFavorite: () => void;
+  onToggleRead: () => void;
 };
 
-export default function BookDetails({ book, onToggleFavorite }: Props) {
+export default function BookDetails({
+  book,
+  onToggleFavorite,
+  onToggleRead,
+}: Props) {
   const router = useRouter();
   const { colors } = useTheme();
   const { t } = useI18n();
@@ -99,9 +105,9 @@ export default function BookDetails({ book, onToggleFavorite }: Props) {
             {book.editeur} · {book.annee}
             {book.note !== null ? ` · Note : ${book.note}/5` : ""}
           </Text>
-          <Text style={[styles.description, { color: colors.text }]}>
-            {book.lu ? "Lu" : "Non lu"}
-          </Text>
+          <View style={styles.readRow}>
+            <ReadStatusToggle lu={book.lu} onPress={onToggleRead} />
+          </View>
           {deleteError && (
             <Text style={[styles.errorText, { color: colors.danger }]}>
               {t("books.delete.error")}
@@ -196,6 +202,9 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: typography.body,
+  },
+  readRow: {
+    marginTop: spacing.md,
   },
   errorText: {
     fontSize: typography.body,

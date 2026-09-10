@@ -23,6 +23,16 @@
     "allLoaded": "Tous les livres sont chargés",
     "error": "Impossible de charger les livres",
     "retry": "Réessayer",
+    "favorite": {
+      "add": "Ajouter aux coups de cœur",
+      "remove": "Retirer des coups de cœur"
+    },
+    "read": {
+      "read": "Lu",
+      "notRead": "Non lu",
+      "markRead": "Marquer comme lu",
+      "markUnread": "Marquer comme non lu"
+    },
     "delete": {
       "action": "Supprimer le livre",
       "confirmTitle": "Supprimer cet ouvrage ?",

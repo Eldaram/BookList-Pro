@@ -23,6 +23,16 @@
     "allLoaded": "All books loaded",
     "error": "Unable to load books",
     "retry": "Retry",
+    "favorite": {
+      "add": "Add to favorites",
+      "remove": "Remove from favorites"
+    },
+    "read": {
+      "read": "Read",
+      "notRead": "Not read",
+      "markRead": "Mark as read",
+      "markUnread": "Mark as unread"
+    },
     "delete": {
       "action": "Delete the book",
       "confirmTitle": "Delete this book?",

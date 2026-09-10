@@ -1,4 +1,4 @@
-import { toggleBookFavori } from "../features/books/favoriteToggle";
+import { toggleBookFavori } from "../features/books/bookFlagToggle";
 import {
   getCachedBook,
   replaceCachedBooks,

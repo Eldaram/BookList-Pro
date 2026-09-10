@@ -6,7 +6,7 @@ import { useBook } from "../../../hooks/useBook";
 
 export default function BookDetailsPage() {
   const { bookId } = useLocalSearchParams<{ bookId: string }>();
-  const { book, loading, error, toggleFavorite } = useBook(bookId);
+  const { book, loading, error, toggleFavorite, toggleRead } = useBook(bookId);
 
   if (loading) return <BookListLoading />;
   if (error || !book) {
@@ -17,6 +17,11 @@ export default function BookDetailsPage() {
     );
   }
   return (
-    <BookDetails key={book.id} book={book} onToggleFavorite={toggleFavorite} />
+    <BookDetails
+      key={book.id}
+      book={book}
+      onToggleFavorite={toggleFavorite}
+      onToggleRead={toggleRead}
+    />
   );
 }

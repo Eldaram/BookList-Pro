@@ -16,7 +16,7 @@ import {
   subscribeBooksCache,
   upsertCachedBook,
 } from "./booksCache";
-import { toggleBookFavori } from "./favoriteToggle";
+import { toggleBookFavori } from "./bookFlagToggle";
 
 export interface BooksContextValue {
   books: Book[];
