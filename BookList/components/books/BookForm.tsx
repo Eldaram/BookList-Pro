@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ScrollView, StyleSheet, Switch, Text, TextInput, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Book } from '../../domain/book';
 import { AppError, isAppError } from '../../domain/error';
@@ -21,8 +21,6 @@ export default function BookForm({ mode, book }: Props) {
   const [auteur, setAuteur] = useState(book?.auteur ?? '');
   const [editeur, setEditeur] = useState(book?.editeur ?? '');
   const [annee, setAnnee] = useState(book ? String(book.annee) : '');
-  const [lu, setLu] = useState(book?.lu ?? false);
-  const [favori, setFavori] = useState(book?.favori ?? false);
   const [couverture] = useState<string | null>(book?.couverture ?? null);
   const [error, setError] = useState<AppError | null>(null);
 
@@ -37,8 +35,8 @@ export default function BookForm({ mode, book }: Props) {
       auteur: auteur.trim(),
       editeur: editeur.trim(),
       annee: Number(annee),
-      lu,
-      favori,
+      lu: book?.lu,
+      favori: book?.favori,
       couverture,
     };
     try {
@@ -95,14 +93,6 @@ export default function BookForm({ mode, book }: Props) {
         keyboardType="numeric"
       />
       {fieldError('annee') && <Text style={styles.fieldError}>{fieldError('annee')}</Text>}
-      <View style={styles.switchRow}>
-        <Text style={styles.label}>Lu</Text>
-        <Switch value={lu} onValueChange={setLu} />
-      </View>
-      <View style={styles.switchRow}>
-        <Text style={styles.label}>Favori</Text>
-        <Switch value={favori} onValueChange={setFavori} />
-      </View>
       {error && error.type !== 'VALIDATION' && (
         <Text style={styles.error}>{error.message}</Text>
       )}
@@ -158,12 +148,6 @@ const styles = StyleSheet.create({
     fontSize: typography.body,
     marginBottom: spacing.md,
     padding: spacing.md,
-  },
-  switchRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: spacing.md,
   },
   error: {
     color: colors.danger,
