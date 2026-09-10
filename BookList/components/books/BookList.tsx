@@ -19,6 +19,7 @@ import { useTheme } from "../../features/theme/ThemeProvider";
 import BookCover from "./BookCover";
 import BookListLoading from "./BookListLoading";
 import AddButton from "../AddButton";
+import FavoriteButton from "../FavoriteButton";
 
 const CELL_TARGET_WIDTH = 160;
 
@@ -32,6 +33,7 @@ export default function BookList() {
     loadingMore,
     refreshing,
     error,
+    toggleFavorite,
     hasMore,
     total,
     fetchNextPage,
@@ -173,7 +175,15 @@ export default function BookList() {
             style={[styles.cell, { flex: 1 / numColumns }]}
             onPress={() => router.push(`/books/${item.id}`)}
           >
-            <BookCover uri={item.couverture} />
+            <View style={styles.coverWrapper}>
+              <BookCover uri={item.couverture} />
+              <View style={styles.favoriteOverlay}>
+                <FavoriteButton
+                  favori={item.favori}
+                  onPress={() => toggleFavorite(item.id)}
+                />
+              </View>
+            </View>
             <Text
               style={[styles.bookTitle, { color: colors.text }]}
               numberOfLines={2}
@@ -224,6 +234,14 @@ const styles = StyleSheet.create({
     marginBottom: spacing.lg,
     marginHorizontal: spacing.md,
     maxWidth: CELL_TARGET_WIDTH + spacing.md * 2,
+  },
+  coverWrapper: {
+    position: "relative",
+  },
+  favoriteOverlay: {
+    position: "absolute",
+    right: 0,
+    top: 0,
   },
   bookTitle: {
     fontSize: typography.body,

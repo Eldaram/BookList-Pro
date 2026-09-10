@@ -49,7 +49,7 @@ describe("uploadCoverToFreeImageHost", () => {
 
     const url = await uploadCoverToFreeImageHost("data:image/jpeg;base64,AAAA");
 
-    expect(url).toBe("https://litter.catbox.moe/test.png");
+    expect(url).toBe("https://freeimage.host/i/test.jpg");
   });
 
   it("throws error when API response is not ok", async () => {
@@ -132,6 +132,6 @@ describe("pickCoverImage", () => {
 
     const result = await pickCoverImage();
 
-    expect(result).toBe("https://litter.catbox.moe/photo.jpg");
+    expect(result).toBe("https://freeimage.host/i/photo.jpg");
   });
 });
