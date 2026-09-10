@@ -1,10 +1,14 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
-import BookList from '../../components/books/BookList';
+import { StatusBar } from "expo-status-bar";
+import { StyleSheet, Text, View } from "react-native";
+import BookList from "../../components/books/BookList";
 
-import { colors, spacing, typography } from '../../theme/tokens';
+import ThemedText from "../../components/ui/ThemedText";
+import { useI18n } from "../../features/i18n/I18nProvider";
+import { spacing, typography } from "../../theme/tokens";
 
 export default function BooksScreen() {
+  const { t } = useI18n();
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>BookList Pro</Text>
@@ -17,20 +21,17 @@ export default function BooksScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: 'center',
-    backgroundColor: colors.background,
+    alignItems: "center",
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
     padding: spacing.lg,
   },
   subtitle: {
-    color: colors.textMuted,
     fontSize: typography.body,
   },
   title: {
-    color: colors.text,
     fontSize: typography.title,
-    fontWeight: '700',
+    fontWeight: "700",
     marginBottom: spacing.md,
   },
 });

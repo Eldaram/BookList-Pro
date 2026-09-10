@@ -13,7 +13,7 @@ class SecureStorage {
   private inMemoryStore = new Map<string, string>();
 
   private get engine(): StorageEngine {
-    if (typeof window !== 'undefined' && window.localStorage) {
+    if (typeof window !== "undefined" && window.localStorage) {
       return window.localStorage;
     }
     return {

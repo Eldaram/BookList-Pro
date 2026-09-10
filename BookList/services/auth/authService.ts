@@ -1,16 +1,16 @@
-import { AuthStatus, User } from '../../domain/auth';
-import { AuthError } from '../../domain/error';
-import { loginApi, refreshApi, getMeApi } from '../api/authApi';
-import { secureStorage } from '../secureStorage';
+import { AuthStatus, User } from "../../domain/auth";
+import { AuthError } from "../../domain/error";
+import { loginApi, refreshApi, getMeApi } from "../api/authApi";
+import { secureStorage } from "../secureStorage";
 
-const REFRESH_TOKEN_KEY = 'BOOKLIST_REFRESH_TOKEN';
+const REFRESH_TOKEN_KEY = "BOOKLIST_REFRESH_TOKEN";
 
 type AuthSubscriber = (status: AuthStatus, user: User | null) => void;
 
 class AuthService {
   private accessToken: string | null = null;
   private currentUser: User | null = null;
-  private status: AuthStatus = 'unauthenticated';
+  private status: AuthStatus = "unauthenticated";
   private subscribers: Set<AuthSubscriber> = new Set();
   private refreshPromise: Promise<string> | null = null;
 
@@ -45,7 +45,7 @@ class AuthService {
 
     this.accessToken = data.accessToken;
     this.currentUser = data.utilisateur;
-    this.status = 'authenticated';
+    this.status = "authenticated";
 
     await secureStorage.setSecureItem(REFRESH_TOKEN_KEY, data.refreshToken);
     this.notify();
@@ -64,24 +64,25 @@ class AuthService {
 
     this.refreshPromise = (async () => {
       try {
-        const storedRefreshToken = await secureStorage.getSecureItem(REFRESH_TOKEN_KEY);
+        const storedRefreshToken =
+          await secureStorage.getSecureItem(REFRESH_TOKEN_KEY);
         if (!storedRefreshToken) {
-          await this.logout('reconnect_required');
+          await this.logout("reconnect_required");
           throw {
-            type: 'AUTH',
-            reason: 'reconnect_required',
-            message: 'Refresh token missing. Please log in again.',
+            type: "AUTH",
+            reason: "reconnect_required",
+            message: "Refresh token missing. Please log in again.",
           } satisfies AuthError;
         }
 
         const data = await refreshApi(storedRefreshToken);
         this.accessToken = data.accessToken;
-        this.status = 'authenticated';
+        this.status = "authenticated";
         this.notify();
 
         return data.accessToken;
       } catch (err) {
-        await this.logout('reconnect_required');
+        await this.logout("reconnect_required");
         throw err;
       } finally {
         this.refreshPromise = null;
@@ -92,32 +93,33 @@ class AuthService {
   }
 
   async checkAuthSanity(): Promise<AuthStatus> {
-    const storedRefreshToken = await secureStorage.getSecureItem(REFRESH_TOKEN_KEY);
+    const storedRefreshToken =
+      await secureStorage.getSecureItem(REFRESH_TOKEN_KEY);
     if (!storedRefreshToken) {
-      this.status = 'unauthenticated';
+      this.status = "unauthenticated";
       this.currentUser = null;
       this.accessToken = null;
       this.notify();
-      return 'unauthenticated';
+      return "unauthenticated";
     }
 
     try {
       const newToken = await this.refreshTokens();
       const user = await getMeApi(newToken);
       this.currentUser = user;
-      this.status = 'authenticated';
+      this.status = "authenticated";
       this.notify();
-      return 'authenticated';
+      return "authenticated";
     } catch {
-      this.status = 'reconnect_required';
+      this.status = "reconnect_required";
       this.currentUser = null;
       this.accessToken = null;
       this.notify();
-      return 'reconnect_required';
+      return "reconnect_required";
     }
   }
 
-  async logout(reason: AuthStatus = 'unauthenticated'): Promise<void> {
+  async logout(reason: AuthStatus = "unauthenticated"): Promise<void> {
     this.accessToken = null;
     this.currentUser = null;
     this.status = reason;
