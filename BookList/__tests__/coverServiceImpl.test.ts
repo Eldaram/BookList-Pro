@@ -4,6 +4,7 @@ import {
   validateCoverFileSize,
   uploadCoverToFreeImageHost,
 } from "../services/servicesImpl/coverServiceImpl";
+import { FREEIMAGEHOST_CONFIG } from "../services/config";
 import * as ImagePicker from "expo-image-picker";
 import * as ImageManipulator from "expo-image-manipulator";
 
@@ -16,6 +17,9 @@ jest.mock("expo-image-manipulator", () => ({
   manipulateAsync: jest.fn(),
   SaveFormat: { JPEG: "jpeg" },
 }));
+
+const hasFreeImageHostKey = Boolean(FREEIMAGEHOST_CONFIG.apiKey);
+const describeFreeImageHost = hasFreeImageHostKey ? describe : describe.skip;
 
 describe("validateCoverFileSize", () => {
   it("does not throw for valid file sizes under 63MB", () => {
@@ -31,7 +35,7 @@ describe("validateCoverFileSize", () => {
   });
 });
 
-describe("uploadCoverToFreeImageHost", () => {
+describeFreeImageHost("uploadCoverToFreeImageHost", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     global.fetch = jest.fn() as jest.Mock;
@@ -132,6 +136,9 @@ describe("pickCoverImage", () => {
 
     const result = await pickCoverImage();
 
-    expect(result).toBe("https://freeimage.host/i/photo.jpg");
+    const expectedUrl = hasFreeImageHostKey
+      ? "https://freeimage.host/i/photo.jpg"
+      : "https://litter.catbox.moe/photo.jpg";
+    expect(result).toBe(expectedUrl);
   });
 });
