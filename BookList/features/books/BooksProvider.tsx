@@ -8,6 +8,7 @@ import React, {
 } from "react";
 import { Book } from "../../domain/book";
 import { AppError, isAppError } from "../../domain/error";
+import { authService } from "../../services/auth/authService";
 import { booksList } from "./booksList";
 
 export interface BooksContextValue {
@@ -48,44 +49,55 @@ export function BooksProvider({ children }: { children: React.ReactNode }) {
 
   // Sync state to refs for stable async callbacks
   const pageRef = useRef(page);
-  pageRef.current = page;
   const hasMoreRef = useRef(hasMore);
-  hasMoreRef.current = hasMore;
   const loadingRef = useRef(loading);
-  loadingRef.current = loading;
   const loadingMoreRef = useRef(loadingMore);
-  loadingMoreRef.current = loadingMore;
   const refreshingRef = useRef(refreshing);
-  refreshingRef.current = refreshing;
+
+  useEffect(() => {
+    pageRef.current = page;
+    hasMoreRef.current = hasMore;
+    loadingRef.current = loading;
+    loadingMoreRef.current = loadingMore;
+    refreshingRef.current = refreshing;
+  }, [page, hasMore, loading, loadingMore, refreshing]);
 
   const setScrollOffset = useCallback((offset: number) => {
     setScrollOffsetState(offset);
   }, []);
 
-  const loadInitialBooks = useCallback(async (limit = DEFAULT_LIMIT) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await booksList.getBooks({ page: 1, limit });
-      setBooks(response.items);
-      setPage(response.page);
-      setTotalPages(response.totalPages);
-      setTotal(response.total);
-      setHasMore(response.page < response.totalPages);
-    } catch (err) {
-      setError(
-        isAppError(err)
-          ? err
-          : { type: "NETWORK", message: "Unexpected error", cause: err },
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
-    loadInitialBooks();
-  }, [loadInitialBooks]);
+    let ignore = false;
+    const init = async () => {
+      setError(null);
+      try {
+        await authService.ensureAuthenticated();
+        const response = await booksList.getBooks({
+          page: 1,
+          limit: DEFAULT_LIMIT,
+        });
+        if (ignore) return;
+        setBooks(response.items);
+        setPage(response.page);
+        setTotalPages(response.totalPages);
+        setTotal(response.total);
+        setHasMore(response.page < response.totalPages);
+      } catch (err) {
+        if (ignore) return;
+        setError(
+          isAppError(err)
+            ? err
+            : { type: "NETWORK", message: "Unexpected error", cause: err },
+        );
+      } finally {
+        if (!ignore) setLoading(false);
+      }
+    };
+    void init();
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   const fetchNextPage = useCallback(async () => {
     if (

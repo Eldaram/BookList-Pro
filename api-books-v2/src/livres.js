@@ -1,6 +1,6 @@
-const crypto = require("crypto");
+const crypto = require('crypto');
 
-const CHAMPS_TRI = ["titre", "auteur", "annee", "note", "updatedAt"];
+const CHAMPS_TRI = ['titre', 'auteur', 'annee', 'note', 'updatedAt'];
 
 function maintenant() {
   return new Date().toISOString();
@@ -17,16 +17,16 @@ function validerLivre(entree, partiel = false) {
   const texte = (cle, obligatoire, max = 200) => {
     const brut = entree[cle];
     if (brut === undefined) {
-      if (obligatoire && !partiel) erreurs[cle] = "champ obligatoire";
+      if (obligatoire && !partiel) erreurs[cle] = 'champ obligatoire';
       return;
     }
-    if (typeof brut !== "string") {
-      erreurs[cle] = "doit etre une chaine";
+    if (typeof brut !== 'string') {
+      erreurs[cle] = 'doit etre une chaine';
       return;
     }
     const propre = brut.trim();
     if (obligatoire && propre.length === 0) {
-      erreurs[cle] = "ne peut pas etre vide";
+      erreurs[cle] = 'ne peut pas etre vide';
       return;
     }
     if (propre.length > max) {
@@ -36,34 +36,31 @@ function validerLivre(entree, partiel = false) {
     v[cle] = propre;
   };
 
-  texte("titre", true);
-  texte("auteur", true);
-  texte("editeur", false);
-  // base64 (data URI) : nettement plus long qu'un texte classique.
-  texte("couverture", false, 2_000_000);
+  texte('titre', true);
+  texte('auteur', true);
+  texte('editeur', false);
+  texte('couverture', false, 500);
 
   if (entree.annee !== undefined) {
     const n = Number(entree.annee);
     if (!Number.isInteger(n) || n < 1450 || n > new Date().getFullYear() + 1) {
-      erreurs.annee = "annee invalide (1450 - annee prochaine)";
+      erreurs.annee = 'annee invalide (1450 - annee prochaine)';
     } else {
       v.annee = n;
     }
   } else if (!partiel) {
-    erreurs.annee = "champ obligatoire";
+    erreurs.annee = 'champ obligatoire';
   }
 
   if (entree.note !== undefined && entree.note !== null) {
     const n = Number(entree.note);
-    if (!Number.isFinite(n) || n < 0 || n > 5)
-      erreurs.note = "note entre 0 et 5";
+    if (!Number.isFinite(n) || n < 0 || n > 5) erreurs.note = 'note entre 0 et 5';
     else v.note = n;
   }
 
-  for (const cle of ["lu", "favori"]) {
+  for (const cle of ['lu', 'favori']) {
     if (entree[cle] !== undefined) {
-      if (typeof entree[cle] !== "boolean")
-        erreurs[cle] = "doit etre un booleen";
+      if (typeof entree[cle] !== 'boolean') erreurs[cle] = 'doit etre un booleen';
       else v[cle] = entree[cle];
     }
   }
@@ -78,7 +75,7 @@ function creerLivre(valeur) {
     id: crypto.randomUUID(),
     titre: valeur.titre,
     auteur: valeur.auteur,
-    editeur: valeur.editeur ?? "",
+    editeur: valeur.editeur ?? '',
     annee: valeur.annee,
     lu: valeur.lu ?? false,
     favori: valeur.favori ?? false,
@@ -103,8 +100,8 @@ function appliquerMaj(livre, valeur) {
 
 function sansAccent(s) {
   return String(s)
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase();
 }
 
@@ -121,38 +118,31 @@ function interroger(livres, params) {
   if (params.q) {
     const q = sansAccent(params.q);
     resultat = resultat.filter(
-      (l) =>
-        sansAccent(l.titre).includes(q) || sansAccent(l.auteur).includes(q),
+      (l) => sansAccent(l.titre).includes(q) || sansAccent(l.auteur).includes(q),
     );
   }
 
-  if (params.status === "lu") resultat = resultat.filter((l) => l.lu === true);
-  if (params.status === "nonlu")
-    resultat = resultat.filter((l) => l.lu === false);
+  if (params.status === 'lu') resultat = resultat.filter((l) => l.lu === true);
+  if (params.status === 'nonlu') resultat = resultat.filter((l) => l.lu === false);
 
-  if (params.favori === "true")
-    resultat = resultat.filter((l) => l.favori === true);
-  if (params.favori === "false")
-    resultat = resultat.filter((l) => l.favori === false);
+  if (params.favori === 'true') resultat = resultat.filter((l) => l.favori === true);
+  if (params.favori === 'false') resultat = resultat.filter((l) => l.favori === false);
 
   if (params.auteur) {
     const a = sansAccent(params.auteur);
     resultat = resultat.filter((l) => sansAccent(l.auteur) === a);
   }
 
-  const champ = CHAMPS_TRI.includes(params.sort) ? params.sort : "titre";
-  const sens = params.order === "desc" ? -1 : 1;
+  const champ = CHAMPS_TRI.includes(params.sort) ? params.sort : 'titre';
+  const sens = params.order === 'desc' ? -1 : 1;
 
   resultat = [...resultat].sort((a, b) => {
     const va = a[champ];
     const vb = b[champ];
     if (va === null || va === undefined) return 1;
     if (vb === null || vb === undefined) return -1;
-    if (typeof va === "number" && typeof vb === "number")
-      return (va - vb) * sens;
-    return (
-      String(va).localeCompare(String(vb), "fr", { sensitivity: "base" }) * sens
-    );
+    if (typeof va === 'number' && typeof vb === 'number') return (va - vb) * sens;
+    return String(va).localeCompare(String(vb), 'fr', { sensitivity: 'base' }) * sens;
   });
 
   const total = resultat.length;
@@ -168,11 +158,4 @@ function interroger(livres, params) {
   };
 }
 
-module.exports = {
-  validerLivre,
-  creerLivre,
-  appliquerMaj,
-  interroger,
-  maintenant,
-  CHAMPS_TRI,
-};
+module.exports = { validerLivre, creerLivre, appliquerMaj, interroger, maintenant, CHAMPS_TRI };

@@ -119,6 +119,29 @@ class AuthService {
     }
   }
 
+  async ensureAuthenticated(): Promise<string> {
+    if (this.accessToken) {
+      return this.accessToken;
+    }
+
+    const sanityStatus = await this.checkAuthSanity();
+    if (sanityStatus === "authenticated" && this.accessToken) {
+      return this.accessToken;
+    }
+
+    const email =
+      process.env.EXPO_PUBLIC_ADMIN_USERNAME;
+    const password =
+      process.env.EXPO_PUBLIC_ADMIN_PASSWORD;
+    await this.login(email, password);
+
+    if (this.accessToken) {
+      return this.accessToken;
+    }
+
+    throw new Error("Failed to establish authenticated session.");
+  }
+
   async logout(reason: AuthStatus = "unauthenticated"): Promise<void> {
     this.accessToken = null;
     this.currentUser = null;

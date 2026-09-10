@@ -135,10 +135,16 @@ class HttpClient {
         if (status === 401) {
           const rawError = errorData.erreur;
 
-          // Attempt transparent token refresh on token expiration
-          if (rawError === "jeton_expire" && !skipAutoRefresh) {
+          // Attempt transparent token refresh or re-authentication
+          if (
+            (rawError === "jeton_expire" || rawError === "jeton_absent") &&
+            !skipAutoRefresh
+          ) {
             try {
-              const newToken = await authService.refreshTokens();
+              const newToken =
+                rawError === "jeton_expire"
+                  ? await authService.refreshTokens()
+                  : await authService.ensureAuthenticated();
               requestHeaders["Authorization"] = `Bearer ${newToken}`;
 
               // Retry original request with new token

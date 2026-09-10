@@ -1,5 +1,4 @@
-import { useCallback, useRef, useEffect, useContext, useState } from "react";
-import { useFocusEffect } from "@react-navigation/native";
+import { useEffect, useContext, useState } from "react";
 import { Book } from "../domain/book";
 import { AppError, isAppError } from "../domain/error";
 import {

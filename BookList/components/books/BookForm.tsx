@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -12,6 +12,7 @@ import { useRouter } from "expo-router";
 import { Book } from "../../domain/book";
 import { AppError, isAppError } from "../../domain/error";
 import { booksList } from "../../features/books/booksList";
+import { BooksContext } from "../../features/books/BooksProvider";
 import { spacing, typography } from "../../theme/tokens";
 import { useTheme } from "../../features/theme/ThemeProvider";
 import { useI18n } from "../../features/i18n/I18nProvider";
@@ -30,6 +31,7 @@ export default function BookForm({ mode, book }: Props) {
   const router = useRouter();
   const { colors } = useTheme();
   const { t } = useI18n();
+  const booksContext = useContext(BooksContext);
   const [titre, setTitre] = useState(book?.titre ?? "");
   const [auteur, setAuteur] = useState(book?.auteur ?? "");
   const [editeur, setEditeur] = useState(book?.editeur ?? "");
@@ -45,8 +47,10 @@ export default function BookForm({ mode, book }: Props) {
     try {
       const uri = await pickCoverImage();
       if (uri) setCouverture(uri);
-    } catch {
-      setCoverError(t("form.cover.error"));
+    } catch (err) {
+      setCoverError(
+        err instanceof Error ? err.message : t("form.cover.error"),
+      );
     }
   };
 
@@ -75,6 +79,11 @@ export default function BookForm({ mode, book }: Props) {
         mode === "CREATE"
           ? await booksList.createBook(input)
           : await booksList.updateBook(book!.id, input, book!.version);
+      if (mode === "CREATE") {
+        booksContext?.addBookToList(saved);
+      } else {
+        booksContext?.updateBookInList(saved);
+      }
       router.replace(`/books/${saved.id}`);
     } catch (err) {
       setError(

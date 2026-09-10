@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useCallback, useState } from "react";
+import { useFocusEffect } from "expo-router";
 import { Book } from "../domain/book";
 import { AppError, isAppError } from "../domain/error";
 import { booksList } from "../features/books/booksList";
@@ -8,23 +9,29 @@ export function useBook(id: string | undefined) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<AppError | null>(null);
 
-  useEffect(() => {
+  const fetchBook = useCallback(async () => {
     if (!id) return;
-    const fetchBook = async () => {
-      try {
-        setBook(await booksList.getBookById(id));
-      } catch (err) {
-        setError(
-          isAppError(err)
-            ? err
-            : { type: "NETWORK", message: "Unexpected error", cause: err },
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchBook();
+    try {
+      const freshBook = await booksList.getBookById(id);
+      setBook(freshBook);
+      setError(null);
+    } catch (err) {
+      setError(
+        isAppError(err)
+          ? err
+          : { type: "NETWORK", message: "Unexpected error", cause: err },
+      );
+    } finally {
+      setLoading(false);
+    }
   }, [id]);
 
-  return { book, loading, error };
+  useFocusEffect(
+    useCallback(() => {
+      void fetchBook();
+    }, [fetchBook]),
+  );
+
+  return { book, loading, error, refetch: fetchBook };
 }
+
