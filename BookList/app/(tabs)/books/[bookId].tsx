@@ -1,8 +1,8 @@
-import { Text, View } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
-import BookDetails from '../../../components/books/BookDetails';
-import BookListLoading from '../../../components/books/BookListLoading';
-import { useBook } from '../../../hooks/useBook';
+import { Text, View } from "react-native";
+import { useLocalSearchParams } from "expo-router";
+import BookDetails from "../../../components/books/BookDetails";
+import BookListLoading from "../../../components/books/BookListLoading";
+import { useBook } from "../../../hooks/useBook";
 
 export default function BookDetailsPage() {
   const { bookId } = useLocalSearchParams<{ bookId: string }>();
@@ -12,7 +12,7 @@ export default function BookDetailsPage() {
   if (error || !book) {
     return (
       <View>
-        <Text>{error?.message ?? 'Livre introuvable.'}</Text>
+        <Text>{error?.message ?? "Livre introuvable."}</Text>
       </View>
     );
   }

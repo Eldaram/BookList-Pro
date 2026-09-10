@@ -1,10 +1,10 @@
-import React from 'react';
-import { ScrollView, Text, StyleSheet, View } from 'react-native';
-import { useRouter } from 'expo-router';
-import BookCover from './BookCover'; 
-import { Book } from '../../domain/book';
-import { colors, spacing, typography } from '../../theme/tokens';
-import UpdateButton from '../UpdateButton';
+import React from "react";
+import { ScrollView, Text, StyleSheet, View } from "react-native";
+import { useRouter } from "expo-router";
+import BookCover from "./BookCover";
+import { Book } from "../../domain/book";
+import { colors, spacing, typography } from "../../theme/tokens";
+import UpdateButton from "../UpdateButton";
 
 export default function BookDetails({ book }: { book: Book }) {
   const router = useRouter();
@@ -14,7 +14,9 @@ export default function BookDetails({ book }: { book: Book }) {
       <View style={styles.card}>
         <View style={styles.editButton}>
           <UpdateButton
-            onPress={() => router.push(`/books/form?mode=UPDATE&bookId=${book.id}`)}
+            onPress={() =>
+              router.push(`/books/form?mode=UPDATE&bookId=${book.id}`)
+            }
           />
         </View>
         <View style={styles.coverWrapper}>
@@ -25,9 +27,9 @@ export default function BookDetails({ book }: { book: Book }) {
           <Text style={styles.author}>{book.auteur}</Text>
           <Text style={styles.description}>
             {book.editeur} · {book.annee}
-            {book.note !== null ? ` · Note : ${book.note}/5` : ''}
+            {book.note !== null ? ` · Note : ${book.note}/5` : ""}
           </Text>
-          <Text style={styles.description}>{book.lu ? 'Lu' : 'Non lu'}</Text>
+          <Text style={styles.description}>{book.lu ? "Lu" : "Non lu"}</Text>
         </View>
       </View>
     </ScrollView>
@@ -44,13 +46,13 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
   },
   card: {
-    alignItems: 'flex-start',
+    alignItems: "flex-start",
     backgroundColor: colors.background,
     borderColor: colors.coverPlaceholder,
     borderRadius: 8,
     borderWidth: 1,
     flex: 1,
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: spacing.lg,
     padding: spacing.lg,
   },
@@ -58,7 +60,7 @@ const styles = StyleSheet.create({
     width: 200,
   },
   editButton: {
-    position: 'absolute',
+    position: "absolute",
     right: 0,
     top: 0,
     zIndex: 1,
@@ -68,7 +70,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: typography.title,
-    fontWeight: '700',
+    fontWeight: "700",
     marginBottom: spacing.md,
   },
   author: {

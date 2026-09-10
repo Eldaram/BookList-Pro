@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
-import { Book } from '../domain/book';
-import { AppError, isAppError } from '../domain/error';
-import { booksList } from '../features/books/booksList';
+import { useEffect, useState } from "react";
+import { Book } from "../domain/book";
+import { AppError, isAppError } from "../domain/error";
+import { booksList } from "../features/books/booksList";
 
 export function useBook(id: string | undefined) {
   const [book, setBook] = useState<Book | null>(null);
@@ -17,7 +17,7 @@ export function useBook(id: string | undefined) {
         setError(
           isAppError(err)
             ? err
-            : { type: 'NETWORK', message: 'Unexpected error', cause: err }
+            : { type: "NETWORK", message: "Unexpected error", cause: err },
         );
       } finally {
         setLoading(false);

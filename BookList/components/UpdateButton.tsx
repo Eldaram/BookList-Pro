@@ -1,7 +1,7 @@
-import React from 'react';
-import { TouchableOpacity, StyleSheet } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
-import { colors, spacing } from '../theme/tokens';
+import React from "react";
+import { TouchableOpacity, StyleSheet } from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
+import { colors, spacing } from "../theme/tokens";
 
 export default function UpdateButton({ onPress }: { onPress: () => void }) {
   return (
@@ -18,11 +18,11 @@ export default function UpdateButton({ onPress }: { onPress: () => void }) {
 
 const styles = StyleSheet.create({
   button: {
-    alignItems: 'center',
+    alignItems: "center",
     backgroundColor: colors.primary,
     borderRadius: 24,
     height: 48,
-    justifyContent: 'center',
+    justifyContent: "center",
     margin: spacing.md,
     width: 48,
   },

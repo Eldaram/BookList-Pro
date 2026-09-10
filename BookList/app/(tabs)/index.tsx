@@ -13,7 +13,7 @@ export default function BooksScreen() {
     <View style={styles.container}>
       <Text style={styles.title}>BookList Pro</Text>
       <Text style={styles.subtitle}>Catalogue des livres</Text>
-      <BookList /> 
+      <BookList />
       <StatusBar style="auto" />
     </View>
   );

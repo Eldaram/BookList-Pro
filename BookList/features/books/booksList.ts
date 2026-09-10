@@ -1,5 +1,5 @@
-import { bookRepository } from '../../services/repository/bookRepository';
-import { BookInput } from '../../domain/book';
+import { bookRepository } from "../../services/repository/bookRepository";
+import { BookInput } from "../../domain/book";
 
 export const booksList = {
   getBooks: async () => {
@@ -11,8 +11,11 @@ export const booksList = {
   createBook: async (input: BookInput) => {
     return await bookRepository.createBook(input);
   },
-  updateBook: async (id: string, input: BookInput, expectedVersion?: number) => {
+  updateBook: async (
+    id: string,
+    input: BookInput,
+    expectedVersion?: number,
+  ) => {
     return await bookRepository.updateBook(id, input, expectedVersion);
   },
 };
-

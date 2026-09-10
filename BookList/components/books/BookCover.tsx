@@ -1,6 +1,6 @@
-import React from 'react';
-import { Image, StyleSheet, View } from 'react-native';
-import { colors } from '../../theme/tokens';
+import React from "react";
+import { Image, StyleSheet, View } from "react-native";
+import { colors } from "../../theme/tokens";
 
 type Props = {
   uri: string | null;
@@ -17,12 +17,12 @@ const styles = StyleSheet.create({
   cover: {
     aspectRatio: 2 / 3,
     borderRadius: 4,
-    width: '100%',
+    width: "100%",
   },
   placeholder: {
     aspectRatio: 2 / 3,
     backgroundColor: colors.coverPlaceholder,
     borderRadius: 4,
-    width: '100%',
+    width: "100%",
   },
 });

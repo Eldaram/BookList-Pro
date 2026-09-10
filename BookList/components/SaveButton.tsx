@@ -1,8 +1,14 @@
-import React from 'react';
-import { TouchableOpacity, Text, StyleSheet } from 'react-native';
-import { colors, spacing, typography } from '../theme/tokens';
+import React from "react";
+import { TouchableOpacity, Text, StyleSheet } from "react-native";
+import { colors, spacing, typography } from "../theme/tokens";
 
-export default function SaveButton({ onPress, disabled }: { onPress: () => void; disabled?: boolean }) {
+export default function SaveButton({
+  onPress,
+  disabled,
+}: {
+  onPress: () => void;
+  disabled?: boolean;
+}) {
   return (
     <TouchableOpacity
       style={[styles.button, disabled && styles.disabled]}
@@ -18,10 +24,10 @@ export default function SaveButton({ onPress, disabled }: { onPress: () => void;
 
 const styles = StyleSheet.create({
   button: {
-    alignItems: 'center',
+    alignItems: "center",
     backgroundColor: colors.primary,
     borderRadius: 8,
-    justifyContent: 'center',
+    justifyContent: "center",
     marginTop: spacing.md,
     padding: spacing.md,
   },
@@ -31,6 +37,6 @@ const styles = StyleSheet.create({
   text: {
     color: colors.textOnPrimary,
     fontSize: typography.body,
-    fontWeight: '700',
+    fontWeight: "700",
   },
 });

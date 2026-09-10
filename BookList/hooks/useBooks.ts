@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react';
-import { Book } from '../domain/book';
-import { AppError, isAppError } from '../domain/error';
-import { booksList } from '../features/books/booksList';
+import { useEffect, useState } from "react";
+import { Book } from "../domain/book";
+import { AppError, isAppError } from "../domain/error";
+import { booksList } from "../features/books/booksList";
 //Ajoute la couverture des livres dans le hook useBooks
-
 
 export function useBooks() {
   const [books, setBooks] = useState<Book[]>([]);
@@ -19,7 +18,7 @@ export function useBooks() {
         setError(
           isAppError(err)
             ? err
-            : { type: 'NETWORK', message: 'Unexpected error', cause: err }
+            : { type: "NETWORK", message: "Unexpected error", cause: err },
         );
       } finally {
         setLoading(false);

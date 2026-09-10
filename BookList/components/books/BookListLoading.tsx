@@ -1,6 +1,6 @@
-import React from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
-import { colors, spacing } from '../../theme/tokens';
+import React from "react";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
+import { colors, spacing } from "../../theme/tokens";
 
 export default function BookListLoading() {
   return (
@@ -12,10 +12,10 @@ export default function BookListLoading() {
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: 'center',
+    alignItems: "center",
     backgroundColor: colors.background,
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
     padding: spacing.lg,
   },
 });
