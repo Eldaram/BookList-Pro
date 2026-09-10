@@ -1,4 +1,5 @@
 import { bookServiceImpl } from "../../services/servicesImpl/bookServiceImpl";
+import { noteServiceImpl } from "../../services/servicesImpl/noteServiceImpl";
 import { BookFilters, BookInput } from "../../domain/book";
 
 export const booksList = {
@@ -23,5 +24,14 @@ export const booksList = {
   },
   patchBook: async (id: string, patch: Partial<BookInput>) => {
     return await bookServiceImpl.patchBook(id, patch);
+  },
+  getNotes: async (bookId: string) => {
+    return await noteServiceImpl.getNotes(bookId);
+  },
+  createNote: async (bookId: string, contenu: string) => {
+    return await noteServiceImpl.createNote(bookId, contenu);
+  },
+  deleteNote: async (bookId: string, noteId: string) => {
+    return await noteServiceImpl.deleteNote(bookId, noteId);
   },
 };

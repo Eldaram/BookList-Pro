@@ -13,6 +13,13 @@ export type Book = {
   version: number;
 };
 
+export type BookNote = {
+  id: string;
+  livreId: string;
+  contenu: string;
+  createdAt: string;
+};
+
 export type PaginatedBooks = {
   items: Book[];
   page: number;
