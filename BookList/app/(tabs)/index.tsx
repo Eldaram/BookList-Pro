@@ -1,5 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
+import BookList from '../../components/books/BookList';
 
 import { colors, spacing, typography } from '../../theme/tokens';
 
@@ -8,6 +9,7 @@ export default function BooksScreen() {
     <View style={styles.container}>
       <Text style={styles.title}>BookList Pro</Text>
       <Text style={styles.subtitle}>Catalogue des livres</Text>
+      <BookList /> 
       <StatusBar style="auto" />
     </View>
   );

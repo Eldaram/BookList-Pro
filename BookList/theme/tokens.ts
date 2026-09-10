@@ -1,5 +1,6 @@
 export const colors = {
   background: '#ffffff',
+  coverPlaceholder: '#cbd5e1',
   text: '#0f172a',
   textMuted: '#475569',
 } as const;
