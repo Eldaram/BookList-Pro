@@ -13,6 +13,7 @@ import { useI18n } from "../../features/i18n/I18nProvider";
 import ConfirmDialog from "../ConfirmDialog";
 import DeleteButton from "../DeleteButton";
 import UndoBanner from "../UndoBanner";
+import BookNotes from "./BookNotes";
 
 const UNDO_DELAY_SECONDS = 5;
 
@@ -117,6 +118,8 @@ export default function BookDetails({ book, onToggleFavorite }: Props) {
           />
         </View>
       </View>
+
+      <BookNotes bookId={book.id} />
 
       <ConfirmDialog
         visible={showConfirm}

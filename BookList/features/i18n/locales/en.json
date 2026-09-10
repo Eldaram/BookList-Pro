@@ -34,6 +34,14 @@
       "error": "Unable to delete this book."
     }
   },
+  "notes": {
+    "title": "Reading notes",
+    "placeholder": "Add a note…",
+    "add": "Add the note",
+    "delete": "Delete the note",
+    "empty": "No notes yet.",
+    "error": "Unable to save the notes operation."
+  },
   "form": {
     "createTitle": "Add a book",
     "updateTitle": "Edit the book",

@@ -50,3 +50,12 @@ export const paginatedBooksSchema = z.object({
   total: z.number(),
   totalPages: z.number(),
 });
+
+export const bookNoteSchema = z.object({
+  id: z.string(),
+  livreId: z.string(),
+  contenu: z.string(),
+  createdAt: z.string(),
+});
+
+export const bookNotesSchema = z.array(bookNoteSchema);
