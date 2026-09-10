@@ -1,12 +1,20 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ScrollView, Text, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import BookCover from "./BookCover";
 import { Book } from "../../domain/book";
+import { AppError, isAppError } from "../../domain/error";
+import { booksList } from "../../features/books/booksList";
 import { spacing, typography } from "../../theme/tokens";
 import { useTheme } from "../../features/theme/ThemeProvider";
 import FavoriteButton from "../FavoriteButton";
 import UpdateButton from "../UpdateButton";
+import { useI18n } from "../../features/i18n/I18nProvider";
+import ConfirmDialog from "../ConfirmDialog";
+import DeleteButton from "../DeleteButton";
+import UndoBanner from "../UndoBanner";
+
+const UNDO_DELAY_SECONDS = 5;
 
 type Props = {
   book: Book;
@@ -14,8 +22,44 @@ type Props = {
 };
 
 export default function BookDetails({ book, onToggleFavorite }: Props) {
+
   const router = useRouter();
   const { colors } = useTheme();
+  const { t } = useI18n();
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [secondsLeft, setSecondsLeft] = useState<number | null>(null);
+  const [deleteError, setDeleteError] = useState<AppError | null>(null);
+  const deletingRef = useRef(false);
+
+  const confirmDelete = () => {
+    setShowConfirm(false);
+    setSecondsLeft(UNDO_DELAY_SECONDS);
+  };
+
+  useEffect(() => {
+    if (secondsLeft === null) return;
+
+    if (secondsLeft <= 0) {
+      if (deletingRef.current) return;
+      deletingRef.current = true;
+      booksList
+        .deleteBook(book.id)
+        .then(() => router.replace("/"))
+        .catch((err) => {
+          deletingRef.current = false;
+          setSecondsLeft(null);
+          setDeleteError(
+            isAppError(err)
+              ? err
+              : { type: "NETWORK", message: "Unexpected error", cause: err },
+          );
+        });
+      return;
+    }
+
+    const timer = setTimeout(() => setSecondsLeft((s) => (s ?? 0) - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [secondsLeft, book.id, router]);
 
   return (
     <ScrollView
@@ -58,8 +102,43 @@ export default function BookDetails({ book, onToggleFavorite }: Props) {
           <Text style={[styles.description, { color: colors.text }]}>
             {book.lu ? "Lu" : "Non lu"}
           </Text>
+          {deleteError && (
+            <Text style={[styles.errorText, { color: colors.danger }]}>
+              {t("books.delete.error")}
+            </Text>
+          )}
+        </View>
+        <View style={styles.deleteButton}>
+          <DeleteButton
+            onPress={() => {
+              setDeleteError(null);
+              setShowConfirm(true);
+            }}
+            disabled={secondsLeft !== null}
+          />
         </View>
       </View>
+
+      <ConfirmDialog
+        visible={showConfirm}
+        title={t("books.delete.confirmTitle")}
+        message={t("books.delete.confirmMessage")}
+        confirmLabel={t("books.delete.confirm")}
+        cancelLabel={t("books.delete.cancel")}
+        onConfirm={confirmDelete}
+        onCancel={() => setShowConfirm(false)}
+      />
+
+      {secondsLeft !== null && (
+        <UndoBanner
+          message={t("books.delete.pending").replace(
+            "{{seconds}}",
+            String(secondsLeft),
+          )}
+          actionLabel={t("books.delete.undo")}
+          onPressAction={() => setSecondsLeft(null)}
+        />
+      )}
     </ScrollView>
   );
 }
@@ -90,6 +169,12 @@ const styles = StyleSheet.create({
     top: 0,
     zIndex: 1,
   },
+  deleteButton: {
+    bottom: 0,
+    position: "absolute",
+    right: 0,
+    zIndex: 1,
+  },
   info: {
     flex: 1,
   },
@@ -109,5 +194,9 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: typography.body,
+  },
+  errorText: {
+    fontSize: typography.body,
+    marginTop: spacing.md,
   },
 });

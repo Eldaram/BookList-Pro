@@ -20,7 +20,17 @@
     "empty": "No books yet",
     "loading": "Loading books…",
     "error": "Unable to load books",
-    "retry": "Retry"
+    "retry": "Retry",
+    "delete": {
+      "action": "Delete the book",
+      "confirmTitle": "Delete this book?",
+      "confirmMessage": "This action becomes permanent after a 5 second delay.",
+      "confirm": "Delete",
+      "cancel": "Cancel",
+      "pending": "Deleting in {{seconds}}s…",
+      "undo": "Undo",
+      "error": "Unable to delete this book."
+    }
   },
   "form": {
     "createTitle": "Add a book",

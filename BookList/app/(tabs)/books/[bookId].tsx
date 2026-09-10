@@ -16,5 +16,7 @@ export default function BookDetailsPage() {
       </View>
     );
   }
-  return <BookDetails book={book} onToggleFavorite={toggleFavorite} />;
+  return (
+    <BookDetails key={book.id} book={book} onToggleFavorite={toggleFavorite} />
+  );
 }
