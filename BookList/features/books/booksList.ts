@@ -21,4 +21,7 @@ export const booksList = {
   deleteBook: async (id: string) => {
     return await bookServiceImpl.deleteBook(id);
   },
+  patchBook: async (id: string, patch: Partial<BookInput>) => {
+    return await bookServiceImpl.patchBook(id, patch);
+  },
 };

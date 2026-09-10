@@ -1,18 +1,38 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Book } from "../domain/book";
 import { AppError, isAppError } from "../domain/error";
 import { booksList } from "../features/books/booksList";
+import {
+  getCachedBook,
+  subscribeBooksCache,
+  upsertCachedBook,
+} from "../features/books/booksCache";
+import { toggleBookFavori } from "../features/books/favoriteToggle";
 
 export function useBook(id: string | undefined) {
-  const [book, setBook] = useState<Book | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [book, setBook] = useState<Book | null>(() =>
+    id ? getCachedBook(id) : null,
+  );
+  const [loading, setLoading] = useState(() =>
+    id ? getCachedBook(id) === null : true,
+  );
   const [error, setError] = useState<AppError | null>(null);
+
+  useEffect(() => {
+    if (!id) return;
+
+    return subscribeBooksCache(() => {
+      setBook(getCachedBook(id));
+    });
+  }, [id]);
 
   useEffect(() => {
     if (!id) return;
     const fetchBook = async () => {
       try {
-        setBook(await booksList.getBookById(id));
+        const freshBook = await booksList.getBookById(id);
+        upsertCachedBook(freshBook);
+        setError(null);
       } catch (err) {
         setError(
           isAppError(err)
@@ -26,5 +46,10 @@ export function useBook(id: string | undefined) {
     fetchBook();
   }, [id]);
 
-  return { book, loading, error };
+  const toggleFavorite = useCallback(() => {
+    if (!book) return;
+    toggleBookFavori(book);
+  }, [book]);
+
+  return { book, loading, error, toggleFavorite };
 }

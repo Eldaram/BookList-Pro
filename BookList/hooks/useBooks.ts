@@ -1,5 +1,4 @@
-import { useCallback, useRef, useEffect, useContext, useState } from "react";
-import { useFocusEffect } from "@react-navigation/native";
+import { useCallback, useEffect, useContext, useState } from "react";
 import { Book } from "../domain/book";
 import { AppError, isAppError } from "../domain/error";
 import {
@@ -7,6 +6,14 @@ import {
   BooksContextValue,
 } from "../features/books/BooksProvider";
 import { booksList } from "../features/books/booksList";
+import {
+  getCachedBook,
+  getCachedBooks,
+  replaceCachedBooks,
+  subscribeBooksCache,
+} from "../features/books/booksCache";
+import { toggleBookFavori } from "../features/books/favoriteToggle";
+//Ajoute la couverture des livres dans le hook useBooks
 
 export function useBooks(): BooksContextValue {
   const context = useContext(BooksContext);
@@ -16,12 +23,21 @@ export function useBooks(): BooksContextValue {
   const [localLoading, setLocalLoading] = useState(true);
   const [localError, setLocalError] = useState<AppError | null>(null);
 
+  // Le fallback passe par le cache pour que le toggle optimiste se propage
+  useEffect(() => {
+    if (context) return;
+    return subscribeBooksCache(() => {
+      setLocalBooks(getCachedBooks() ?? []);
+    });
+  }, [context]);
+
   useEffect(() => {
     if (context) return;
     let isMounted = true;
     const fetchBooks = async () => {
       try {
         const response = await booksList.getBooks();
+        replaceCachedBooks(response.items);
         if (isMounted) {
           setLocalBooks(response.items);
         }
@@ -45,6 +61,15 @@ export function useBooks(): BooksContextValue {
     };
   }, [context]);
 
+  const toggleFavorite = useCallback(
+    (id: string) => {
+      const current = getCachedBook(id) ?? localBooks.find((b) => b.id === id);
+      if (!current) return;
+      toggleBookFavori(current);
+    },
+    [localBooks],
+  );
+
   if (context) {
     return context;
   }
@@ -65,5 +90,6 @@ export function useBooks(): BooksContextValue {
     setScrollOffset: () => {},
     addBookToList: () => {},
     updateBookInList: () => {},
+    toggleFavorite,
   };
 }

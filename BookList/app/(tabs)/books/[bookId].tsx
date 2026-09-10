@@ -6,7 +6,7 @@ import { useBook } from "../../../hooks/useBook";
 
 export default function BookDetailsPage() {
   const { bookId } = useLocalSearchParams<{ bookId: string }>();
-  const { book, loading, error } = useBook(bookId);
+  const { book, loading, error, toggleFavorite } = useBook(bookId);
 
   if (loading) return <BookListLoading />;
   if (error || !book) {
@@ -16,5 +16,7 @@ export default function BookDetailsPage() {
       </View>
     );
   }
-  return <BookDetails key={book.id} book={book} />;
+  return (
+    <BookDetails key={book.id} book={book} onToggleFavorite={toggleFavorite} />
+  );
 }

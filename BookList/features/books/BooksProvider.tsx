@@ -9,6 +9,14 @@ import React, {
 import { Book } from "../../domain/book";
 import { AppError, isAppError } from "../../domain/error";
 import { booksList } from "./booksList";
+import {
+  getCachedBook,
+  getCachedBooks,
+  replaceCachedBooks,
+  subscribeBooksCache,
+  upsertCachedBook,
+} from "./booksCache";
+import { toggleBookFavori } from "./favoriteToggle";
 
 export interface BooksContextValue {
   books: Book[];
@@ -26,6 +34,7 @@ export interface BooksContextValue {
   setScrollOffset: (offset: number) => void;
   addBookToList: (newBook: Book) => void;
   updateBookInList: (updatedBook: Book) => void;
+  toggleFavorite: (id: string) => void;
 }
 
 const DEFAULT_LIMIT = 20;
@@ -62,11 +71,23 @@ export function BooksProvider({ children }: { children: React.ReactNode }) {
     setScrollOffsetState(offset);
   }, []);
 
+  // Reflete les patchs du cache (toggle favori optimiste, fiche detail) dans la liste
+  useEffect(() => {
+    return subscribeBooksCache(() => {
+      const cached = getCachedBooks();
+      if (!cached) return;
+      setBooks((prev) =>
+        prev.map((b) => cached.find((c) => c.id === b.id) ?? b),
+      );
+    });
+  }, []);
+
   const loadInitialBooks = useCallback(async (limit = DEFAULT_LIMIT) => {
     setLoading(true);
     setError(null);
     try {
       const response = await booksList.getBooks({ page: 1, limit });
+      replaceCachedBooks(response.items);
       setBooks(response.items);
       setPage(response.page);
       setTotalPages(response.totalPages);
@@ -112,6 +133,7 @@ export function BooksProvider({ children }: { children: React.ReactNode }) {
         const newItems = response.items.filter((b) => !existingIds.has(b.id));
         return [...prevBooks, ...newItems];
       });
+      response.items.forEach(upsertCachedBook);
 
       setPage(response.page);
       setTotalPages(response.totalPages);
@@ -141,6 +163,7 @@ export function BooksProvider({ children }: { children: React.ReactNode }) {
         page: 1,
         limit: DEFAULT_LIMIT,
       });
+      replaceCachedBooks(response.items);
       setBooks(response.items);
       setPage(response.page);
       setTotalPages(response.totalPages);
@@ -161,12 +184,20 @@ export function BooksProvider({ children }: { children: React.ReactNode }) {
   const addBookToList = useCallback((newBook: Book) => {
     setBooks((prev) => [newBook, ...prev.filter((b) => b.id !== newBook.id)]);
     setTotal((prev) => prev + 1);
+    upsertCachedBook(newBook);
   }, []);
 
   const updateBookInList = useCallback((updatedBook: Book) => {
     setBooks((prev) =>
       prev.map((b) => (b.id === updatedBook.id ? updatedBook : b)),
     );
+    upsertCachedBook(updatedBook);
+  }, []);
+
+  const toggleFavorite = useCallback((id: string) => {
+    const current = getCachedBook(id);
+    if (!current) return;
+    toggleBookFavori(current);
   }, []);
 
   return (
@@ -187,6 +218,7 @@ export function BooksProvider({ children }: { children: React.ReactNode }) {
         setScrollOffset,
         addBookToList,
         updateBookInList,
+        toggleFavorite,
       }}
     >
       {children}
