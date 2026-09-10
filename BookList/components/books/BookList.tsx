@@ -1,13 +1,13 @@
-import React, { useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import {
   ActivityIndicator,
   FlatList,
   NativeSyntheticEvent,
   NativeScrollEvent,
-  Pressable,
   RefreshControl,
   StyleSheet,
   Text,
+  TouchableOpacity,
   useWindowDimensions,
   View,
 } from "react-native";
@@ -16,10 +16,9 @@ import { spacing, typography } from "../../theme/tokens";
 import { useBooks } from "../../hooks/useBooks";
 import { useI18n } from "../../features/i18n/I18nProvider";
 import { useTheme } from "../../features/theme/ThemeProvider";
-import BookCover from "./BookCover";
+import BookCell from "./BookCell";
 import BookListLoading from "./BookListLoading";
 import AddButton from "../AddButton";
-import FavoriteButton from "../FavoriteButton";
 
 const CELL_TARGET_WIDTH = 160;
 
@@ -50,6 +49,11 @@ export default function BookList() {
   const numColumns = Math.max(
     2,
     Math.floor(width / (CELL_TARGET_WIDTH + spacing.md * 2)),
+  );
+
+  const openBook = useCallback(
+    (id: string) => router.push(`/books/${id}`),
+    [router],
   );
 
   useEffect(() => {
@@ -109,6 +113,16 @@ export default function BookList() {
         <Text style={[styles.errorMessage, { color: colors.textMuted }]}>
           {error.message}
         </Text>
+        <TouchableOpacity
+          style={[styles.retryButton, { backgroundColor: colors.primary }]}
+          onPress={refresh}
+          accessibilityRole="button"
+          accessibilityLabel={t("books.retry")}
+        >
+          <Text style={{ color: colors.textOnPrimary }}>
+            {t("books.retry")}
+          </Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -171,32 +185,12 @@ export default function BookList() {
         }
         ListFooterComponent={renderFooter}
         renderItem={({ item }) => (
-          <Pressable
-            style={[styles.cell, { flex: 1 / numColumns }]}
-            onPress={() => router.push(`/books/${item.id}`)}
-          >
-            <View style={styles.coverWrapper}>
-              <BookCover uri={item.couverture} />
-              <View style={styles.favoriteOverlay}>
-                <FavoriteButton
-                  favori={item.favori}
-                  onPress={() => toggleFavorite(item.id)}
-                />
-              </View>
-            </View>
-            <Text
-              style={[styles.bookTitle, { color: colors.text }]}
-              numberOfLines={2}
-            >
-              {item.titre}
-            </Text>
-            <Text
-              style={[styles.bookAuthor, { color: colors.textMuted }]}
-              numberOfLines={1}
-            >
-              {item.auteur}
-            </Text>
-          </Pressable>
+          <BookCell
+            book={item}
+            numColumns={numColumns}
+            onOpen={openBook}
+            onToggleFavorite={toggleFavorite}
+          />
         )}
       />
     </View>
@@ -218,6 +212,14 @@ const styles = StyleSheet.create({
     fontSize: typography.body,
     textAlign: "center",
   },
+  retryButton: {
+    alignItems: "center",
+    borderRadius: 8,
+    justifyContent: "center",
+    marginTop: spacing.lg,
+    minHeight: 44,
+    paddingHorizontal: spacing.lg,
+  },
   grid: {
     padding: spacing.md,
   },
@@ -229,27 +231,6 @@ const styles = StyleSheet.create({
   list: {
     alignSelf: "stretch",
     flex: 1,
-  },
-  cell: {
-    marginBottom: spacing.lg,
-    marginHorizontal: spacing.md,
-    maxWidth: CELL_TARGET_WIDTH + spacing.md * 2,
-  },
-  coverWrapper: {
-    position: "relative",
-  },
-  favoriteOverlay: {
-    position: "absolute",
-    right: 0,
-    top: 0,
-  },
-  bookTitle: {
-    fontSize: typography.body,
-    fontWeight: "700",
-    marginTop: spacing.md,
-  },
-  bookAuthor: {
-    fontSize: typography.body,
   },
   footerLoader: {
     alignItems: "center",
