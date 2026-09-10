@@ -18,4 +18,7 @@ export const booksList = {
   ) => {
     return await bookRepository.updateBook(id, input, expectedVersion);
   },
+  deleteBook: async (id: string) => {
+    return await bookRepository.deleteBook(id);
+  },
 };
