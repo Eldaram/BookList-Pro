@@ -3,7 +3,7 @@ const rawBaseUrl = process.env.EXPO_PUBLIC_API_URL;
 if (!rawBaseUrl || rawBaseUrl.trim() === "") {
   throw new Error(
     "[CONFIG ERROR] EXPO_PUBLIC_API_URL environment variable is missing. " +
-    "Please define EXPO_PUBLIC_API_URL in your .env file before launching the application.",
+      "Please define EXPO_PUBLIC_API_URL in your .env file before launching the application.",
   );
 }
 

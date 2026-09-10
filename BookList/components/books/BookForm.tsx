@@ -48,9 +48,7 @@ export default function BookForm({ mode, book }: Props) {
       const uri = await pickCoverImage();
       if (uri) setCouverture(uri);
     } catch (err) {
-      setCoverError(
-        err instanceof Error ? err.message : t("form.cover.error"),
-      );
+      setCoverError(err instanceof Error ? err.message : t("form.cover.error"));
     }
   };
 

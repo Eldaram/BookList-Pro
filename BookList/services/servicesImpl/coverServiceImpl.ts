@@ -16,7 +16,8 @@ export function validateCoverFileSize(fileSizeInBytes?: number | null): void {
     fileSizeInBytes > FREEIMAGEHOST_CONFIG.maxFileSizeBytes
   ) {
     throw new Error(
-      `Image size exceeds maximum limit of ${FREEIMAGEHOST_CONFIG.maxFileSizeBytes / (1024 * 1024)
+      `Image size exceeds maximum limit of ${
+        FREEIMAGEHOST_CONFIG.maxFileSizeBytes / (1024 * 1024)
       } MB.`,
     );
   }
@@ -44,8 +45,8 @@ export async function uploadCoverToFreeImageHost(
         typeof window !== "undefined" && typeof window.document !== "undefined";
       const uploadUrl = isWeb
         ? `https://corsproxy.io/?${encodeURIComponent(
-          FREEIMAGEHOST_CONFIG.uploadUrl,
-        )}`
+            FREEIMAGEHOST_CONFIG.uploadUrl,
+          )}`
         : FREEIMAGEHOST_CONFIG.uploadUrl;
 
       const response = await fetch(uploadUrl, {

@@ -129,10 +129,8 @@ class AuthService {
       return this.accessToken;
     }
 
-    const email =
-      process.env.EXPO_PUBLIC_ADMIN_USERNAME;
-    const password =
-      process.env.EXPO_PUBLIC_ADMIN_PASSWORD;
+    const email = process.env.EXPO_PUBLIC_ADMIN_USERNAME;
+    const password = process.env.EXPO_PUBLIC_ADMIN_PASSWORD;
     await this.login(email, password);
 
     if (this.accessToken) {

@@ -72,5 +72,3 @@ export function useBook(id: string | undefined) {
     toggleRead,
   };
 }
-
-
