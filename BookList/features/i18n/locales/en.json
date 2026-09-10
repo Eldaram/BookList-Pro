@@ -30,6 +30,11 @@
     "publisher": "Publisher",
     "year": "Year",
     "save": "Save",
-    "unexpectedError": "An unexpected error occurred."
+    "unexpectedError": "An unexpected error occurred.",
+    "cover": {
+      "add": "Add a cover",
+      "reset": "Reset to default cover",
+      "error": "Unable to load the selected image."
+    }
   }
 }

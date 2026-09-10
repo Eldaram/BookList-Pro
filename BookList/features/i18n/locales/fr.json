@@ -30,6 +30,11 @@
     "publisher": "Éditeur",
     "year": "Année",
     "save": "Sauvegarder",
-    "unexpectedError": "Une erreur inattendue est survenue."
+    "unexpectedError": "Une erreur inattendue est survenue.",
+    "cover": {
+      "add": "Ajouter une couverture",
+      "reset": "Revenir a la couverture par defaut",
+      "error": "Impossible de charger l'image selectionnee."
+    }
   }
 }
