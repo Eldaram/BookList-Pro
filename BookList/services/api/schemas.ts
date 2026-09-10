@@ -57,5 +57,15 @@ export const bookNoteSchema = z.object({
   contenu: z.string(),
   createdAt: z.string(),
 });
+export const bookFormSchema = z.object({
+  titre: z.string(),
+  auteur: z.string(),
+  editeur: z.string(),
+  annee: z.number(),
+  lu: z.boolean(),
+  favori: z.boolean(),
+  note: z.number().nullable(),
+  couverture: z.string().nullable(),
+});
 
 export const bookNotesSchema = z.array(bookNoteSchema);
