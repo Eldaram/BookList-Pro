@@ -1,17 +1,17 @@
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from "react-native";
 
-import ThemedText from '../../components/ui/ThemedText';
-import { useI18n } from '../../features/i18n/I18nProvider';
-import { spacing, typography } from '../../theme/tokens';
+import ThemedText from "../../components/ui/ThemedText";
+import { useI18n } from "../../features/i18n/I18nProvider";
+import { spacing, typography } from "../../theme/tokens";
 
 export default function BooksScreen() {
   const { t } = useI18n();
 
   return (
     <View style={styles.container}>
-      <ThemedText style={styles.title}>{t('app.title')}</ThemedText>
+      <ThemedText style={styles.title}>{t("app.title")}</ThemedText>
       <ThemedText muted style={styles.subtitle}>
-        {t('app.subtitle')}
+        {t("app.subtitle")}
       </ThemedText>
     </View>
   );
@@ -19,9 +19,9 @@ export default function BooksScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: 'center',
+    alignItems: "center",
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
     padding: spacing.lg,
   },
   subtitle: {
@@ -29,7 +29,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: typography.title,
-    fontWeight: '700',
+    fontWeight: "700",
     marginBottom: spacing.md,
   },
 });

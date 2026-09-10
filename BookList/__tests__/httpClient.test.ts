@@ -1,6 +1,6 @@
-import { httpClient } from '../services/api/httpClient';
-import { authService } from '../services/auth/authService';
-import { z } from 'zod';
+import { httpClient } from "../services/api/httpClient";
+import { authService } from "../services/auth/authService";
+import { z } from "zod";
 
 const globalFetch = global.fetch;
 
@@ -9,7 +9,7 @@ type MutableAuthService = {
   refreshPromise: Promise<string> | null;
 };
 
-describe('HttpClient Interceptors & Resiliency', () => {
+describe("HttpClient Interceptors & Resiliency", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (authService as unknown as MutableAuthService).accessToken = null;
@@ -20,26 +20,33 @@ describe('HttpClient Interceptors & Resiliency', () => {
     global.fetch = globalFetch;
   });
 
-  it('should inject Bearer token into Authorization header when available', async () => {
-    (authService as unknown as MutableAuthService).accessToken = 'test-access-token';
+  it("should inject Bearer token into Authorization header when available", async () => {
+    (authService as unknown as MutableAuthService).accessToken =
+      "test-access-token";
 
     const mockFetch = jest.fn().mockResolvedValue({
       ok: true,
       status: 200,
-      json: async () => ({ status: 'ok' }),
+      json: async () => ({ status: "ok" }),
     });
     global.fetch = mockFetch as unknown as typeof fetch;
 
-    await httpClient.request('/health');
+    await httpClient.request("/health");
 
     expect(mockFetch).toHaveBeenCalledTimes(1);
-    const [, options] = mockFetch.mock.calls[0] as [string, RequestInit & { headers: Record<string, string> }];
-    expect(options.headers['Authorization']).toBe('Bearer test-access-token');
+    const [, options] = mockFetch.mock.calls[0] as [
+      string,
+      RequestInit & { headers: Record<string, string> },
+    ];
+    expect(options.headers["Authorization"]).toBe("Bearer test-access-token");
   });
 
-  it('should automatically refresh token on 401 jeton_expire and retry request', async () => {
-    (authService as unknown as MutableAuthService).accessToken = 'expired-token';
-    jest.spyOn(authService, 'refreshTokens').mockResolvedValue('new-fresh-token');
+  it("should automatically refresh token on 401 jeton_expire and retry request", async () => {
+    (authService as unknown as MutableAuthService).accessToken =
+      "expired-token";
+    jest
+      .spyOn(authService, "refreshTokens")
+      .mockResolvedValue("new-fresh-token");
 
     let callCount = 0;
     const mockFetch = jest.fn().mockImplementation(async () => {
@@ -48,7 +55,10 @@ describe('HttpClient Interceptors & Resiliency', () => {
         return {
           ok: false,
           status: 401,
-          json: async () => ({ erreur: 'jeton_expire', message: 'Jeton expiré' }),
+          json: async () => ({
+            erreur: "jeton_expire",
+            message: "Jeton expiré",
+          }),
         };
       }
       return {
@@ -59,13 +69,13 @@ describe('HttpClient Interceptors & Resiliency', () => {
     });
     global.fetch = mockFetch as unknown as typeof fetch;
 
-    const result = await httpClient.request<{ success: boolean }>('/books');
+    const result = await httpClient.request<{ success: boolean }>("/books");
 
     expect(authService.refreshTokens).toHaveBeenCalledTimes(1);
     expect(result).toEqual({ success: true });
   });
 
-  it('should validate response against Zod schema and throw ErreurValidation if payload is invalid', async () => {
+  it("should validate response against Zod schema and throw ErreurValidation if payload is invalid", async () => {
     const mockFetch = jest.fn().mockResolvedValue({
       ok: true,
       status: 200,
@@ -77,8 +87,10 @@ describe('HttpClient Interceptors & Resiliency', () => {
       requiredName: z.string(),
     });
 
-    await expect(httpClient.request('/test', { schema: testSchema })).rejects.toMatchObject({
-      type: 'VALIDATION',
+    await expect(
+      httpClient.request("/test", { schema: testSchema }),
+    ).rejects.toMatchObject({
+      type: "VALIDATION",
     });
   });
 });

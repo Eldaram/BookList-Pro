@@ -1,14 +1,14 @@
-import { bookRepository } from '../services/repository/bookRepository';
-import { booksApi } from '../services/api/booksApi';
+import { bookRepository } from "../services/repository/bookRepository";
+import { booksApi } from "../services/api/booksApi";
 
-jest.mock('../services/api/booksApi');
+jest.mock("../services/api/booksApi");
 
-describe('BookRepository Suite', () => {
+describe("BookRepository Suite", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should delegate getBooks request to booksApi', async () => {
+  it("should delegate getBooks request to booksApi", async () => {
     const mockPaginated = {
       items: [],
       page: 1,
@@ -18,34 +18,34 @@ describe('BookRepository Suite', () => {
     };
     (booksApi.getBooks as jest.Mock).mockResolvedValue(mockPaginated);
 
-    const result = await bookRepository.getBooks({ page: 1, q: 'Dune' });
+    const result = await bookRepository.getBooks({ page: 1, q: "Dune" });
 
-    expect(booksApi.getBooks).toHaveBeenCalledWith({ page: 1, q: 'Dune' });
+    expect(booksApi.getBooks).toHaveBeenCalledWith({ page: 1, q: "Dune" });
     expect(result).toEqual(mockPaginated);
   });
 
-  it('should delegate createBook request to booksApi', async () => {
+  it("should delegate createBook request to booksApi", async () => {
     const mockBook = {
-      id: 'uuid-1',
-      titre: 'Le Seigneur des Anneaux',
-      auteur: 'J.R.R. Tolkien',
-      editeur: 'Bourgois',
+      id: "uuid-1",
+      titre: "Le Seigneur des Anneaux",
+      auteur: "J.R.R. Tolkien",
+      editeur: "Bourgois",
       annee: 1954,
       lu: true,
       favori: true,
       note: 5,
       couverture: null,
-      createdAt: '2026-09-09T00:00:00Z',
-      updatedAt: '2026-09-09T00:00:00Z',
+      createdAt: "2026-09-09T00:00:00Z",
+      updatedAt: "2026-09-09T00:00:00Z",
       version: 1,
     };
 
     (booksApi.createBook as jest.Mock).mockResolvedValue(mockBook);
 
     const input = {
-      titre: 'Le Seigneur des Anneaux',
-      auteur: 'J.R.R. Tolkien',
-      editeur: 'Bourgois',
+      titre: "Le Seigneur des Anneaux",
+      auteur: "J.R.R. Tolkien",
+      editeur: "Bourgois",
       annee: 1954,
     };
 

@@ -36,8 +36,8 @@ export type BookFilters = {
   page?: number;
   limit?: number;
   q?: string;
-  status?: 'lu' | 'nonlu';
+  status?: "lu" | "nonlu";
   favori?: boolean;
-  sort?: 'titre' | 'auteur' | 'annee' | 'note' | 'updatedAt';
-  order?: 'asc' | 'desc';
+  sort?: "titre" | "auteur" | "annee" | "note" | "updatedAt";
+  order?: "asc" | "desc";
 };

@@ -1,5 +1,10 @@
-import { booksApi } from '../api/booksApi';
-import { Book, BookFilters, BookInput, PaginatedBooks } from '../../domain/book';
+import { booksApi } from "../api/booksApi";
+import {
+  Book,
+  BookFilters,
+  BookInput,
+  PaginatedBooks,
+} from "../../domain/book";
 
 /**
  * Repository encapsulating booksApi and domain data access.
@@ -19,7 +24,11 @@ class BookRepository {
     return booksApi.createBook(input);
   }
 
-  async updateBook(id: string, input: BookInput, expectedVersion?: number): Promise<Book> {
+  async updateBook(
+    id: string,
+    input: BookInput,
+    expectedVersion?: number,
+  ): Promise<Book> {
     return booksApi.updateBook(id, input, expectedVersion);
   }
 

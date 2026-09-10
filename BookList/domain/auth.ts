@@ -1,4 +1,4 @@
-export type Role = 'editeur' | 'lecteur';
+export type Role = "editeur" | "lecteur";
 
 export type User = {
   id: string;
@@ -18,4 +18,5 @@ export type LoginCredentials = {
   motDePasse: string;
 };
 
-export type AuthStatus = 'unauthenticated' | 'authenticated' | 'reconnect_required';
+export type AuthStatus =
+  "unauthenticated" | "authenticated" | "reconnect_required";

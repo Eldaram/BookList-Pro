@@ -1,13 +1,21 @@
-import { createContext, ReactNode, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import {
+  createContext,
+  ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
-import { secureStorage } from '../../services/secureStorage';
-import en from './locales/en.json';
-import fr from './locales/fr.json';
+import { secureStorage } from "../../services/secureStorage";
+import en from "./locales/en.json";
+import fr from "./locales/fr.json";
 
 const translations = { en, fr } as const;
-const LOCALE_STORAGE_KEY = 'BOOKLIST_LOCALE';
+const LOCALE_STORAGE_KEY = "BOOKLIST_LOCALE";
 
-const intlLocales = { fr: 'fr-FR', en: 'en-GB' } as const;
+const intlLocales = { fr: "fr-FR", en: "en-GB" } as const;
 
 export type Locale = keyof typeof translations;
 
@@ -19,14 +27,17 @@ type I18nContextValue = {
   locale: Locale;
   setLocale: (locale: Locale) => void;
   t: (key: string) => string;
-  formatDate: (date: Date | number | string, options?: Intl.DateTimeFormatOptions) => string;
+  formatDate: (
+    date: Date | number | string,
+    options?: Intl.DateTimeFormatOptions,
+  ) => string;
   formatNumber: (value: number, options?: Intl.NumberFormatOptions) => string;
 };
 
 const I18nContext = createContext<I18nContextValue | undefined>(undefined);
 
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>('fr');
+  const [locale, setLocaleState] = useState<Locale>("fr");
 
   useEffect(() => {
     void secureStorage.getSecureItem(LOCALE_STORAGE_KEY).then((stored) => {
@@ -47,18 +58,20 @@ export function I18nProvider({ children }: { children: ReactNode }) {
       setLocale,
       t: (key: string) => {
         const result = key
-          .split('.')
+          .split(".")
           .reduce<unknown>(
             (obj, part) => (obj as Record<string, unknown> | undefined)?.[part],
             translations[locale],
           );
-        return typeof result === 'string' ? result : key;
+        return typeof result === "string" ? result : key;
       },
       formatDate: (date, options) =>
-        new Intl.DateTimeFormat(intlLocales[locale], options ?? { dateStyle: 'medium' }).format(
-          new Date(date),
-        ),
-      formatNumber: (num, options) => new Intl.NumberFormat(intlLocales[locale], options).format(num),
+        new Intl.DateTimeFormat(
+          intlLocales[locale],
+          options ?? { dateStyle: "medium" },
+        ).format(new Date(date)),
+      formatNumber: (num, options) =>
+        new Intl.NumberFormat(intlLocales[locale], options).format(num),
     }),
     [locale, setLocale],
   );
@@ -69,7 +82,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
 export function useI18n() {
   const ctx = useContext(I18nContext);
   if (!ctx) {
-    throw new Error('useI18n doit être utilisé dans un I18nProvider');
+    throw new Error("useI18n doit être utilisé dans un I18nProvider");
   }
   return ctx;
 }
