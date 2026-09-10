@@ -54,4 +54,42 @@ describe("BookServiceImpl Suite", () => {
     expect(booksApi.createBook).toHaveBeenCalledWith(input);
     expect(result).toEqual(mockBook);
   });
+
+  it("should delegate updateBook request to booksApi with the expected version", async () => {
+    const mockBook = {
+      id: "uuid-1",
+      titre: "Dune",
+      auteur: "Frank Herbert",
+      editeur: "Robert Laffont",
+      annee: 1965,
+      lu: false,
+      favori: false,
+      note: null,
+      couverture: null,
+      createdAt: "2026-09-09T00:00:00Z",
+      updatedAt: "2026-09-10T00:00:00Z",
+      version: 2,
+    };
+    (booksApi.updateBook as jest.Mock).mockResolvedValue(mockBook);
+
+    const input = {
+      titre: "Dune",
+      auteur: "Frank Herbert",
+      editeur: "Robert Laffont",
+      annee: 1965,
+    };
+
+    const result = await bookServiceImpl.updateBook("uuid-1", input, 1);
+
+    expect(booksApi.updateBook).toHaveBeenCalledWith("uuid-1", input, 1);
+    expect(result).toEqual(mockBook);
+  });
+
+  it("should delegate deleteBook request to booksApi", async () => {
+    (booksApi.deleteBook as jest.Mock).mockResolvedValue(undefined);
+
+    await bookServiceImpl.deleteBook("uuid-1");
+
+    expect(booksApi.deleteBook).toHaveBeenCalledWith("uuid-1");
+  });
 });
