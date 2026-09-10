@@ -29,11 +29,7 @@ describe("booksList Suite", () => {
 
     const result = await booksList.updateBook("uuid-1", input, 2);
 
-    expect(bookServiceImpl.updateBook).toHaveBeenCalledWith(
-      "uuid-1",
-      input,
-      2,
-    );
+    expect(bookServiceImpl.updateBook).toHaveBeenCalledWith("uuid-1", input, 2);
     expect(result).toEqual(mockBook);
   });
 });

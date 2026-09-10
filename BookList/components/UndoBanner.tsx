@@ -9,7 +9,11 @@ type Props = {
   onPressAction: () => void;
 };
 
-export default function UndoBanner({ message, actionLabel, onPressAction }: Props) {
+export default function UndoBanner({
+  message,
+  actionLabel,
+  onPressAction,
+}: Props) {
   const { colors } = useTheme();
   return (
     <View style={[styles.banner, { backgroundColor: colors.text }]}>
