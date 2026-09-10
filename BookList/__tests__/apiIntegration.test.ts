@@ -9,6 +9,12 @@ const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
 const ADMIN_USERNAME = process.env.EXPO_PUBLIC_ADMIN_USERNAME;
 const ADMIN_PASSWORD = process.env.EXPO_PUBLIC_ADMIN_PASSWORD;
 
+if (!ADMIN_USERNAME || !ADMIN_PASSWORD) {
+  throw new Error(
+    '[TEST CONFIG ERROR] EXPO_PUBLIC_ADMIN_USERNAME and EXPO_PUBLIC_ADMIN_PASSWORD must be defined in your .env file to run the integration test.'
+  );
+}
+
 describe('Real API Connection & Integration Suite', () => {
   let apiProcess: ChildProcess | null = null;
 
@@ -52,7 +58,7 @@ describe('Real API Connection & Integration Suite', () => {
     expect(health.version).toBe('2.0.0');
   });
 
-  it('should authenticate with real credentials and retrieve a valid JWT access token', async () => {
+  it('should authenticate with real credentials from .env and retrieve a valid JWT access token', async () => {
     const user = await authService.login(ADMIN_USERNAME, ADMIN_PASSWORD);
 
     expect(user.email).toBe(ADMIN_USERNAME);

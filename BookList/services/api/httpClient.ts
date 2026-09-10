@@ -25,7 +25,8 @@ async function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-function mapApiAuthReason(serverReason?: string): AuthReason {
+function mapApiAuthReason(serverReason?: unknown): AuthReason {
+  if (typeof serverReason !== 'string') return 'token_invalid';
   switch (serverReason) {
     case 'jeton_absent':
       return 'token_missing';
@@ -40,25 +41,10 @@ function mapApiAuthReason(serverReason?: string): AuthReason {
   }
 }
 
-export { mapApiAuthReason };
-
-type ApiErrorPayload = {
-  erreur?: string;
-  message?: string;
-  serveur?: unknown;
-  versionAttendue?: number;
-  champs?: Record<string, string>;
-};
-
 function isAppError(err: unknown): err is AppError {
-  return (
-    typeof err === 'object' &&
-    err !== null &&
-    'type' in err &&
-    ['AUTH', 'VALIDATION', 'CONFLICT', 'SERVER', 'NETWORK'].includes(
-      (err as { type: string }).type,
-    )
-  );
+  if (typeof err !== 'object' || err === null) return false;
+  const type = (err as { type?: string }).type;
+  return typeof type === 'string' && ['AUTH', 'VALIDATION', 'CONFLICT', 'SERVER', 'NETWORK'].includes(type);
 }
 
 class HttpClient {
@@ -126,18 +112,19 @@ class HttpClient {
         }
 
         // Handle error status responses
-        let errorData: ApiErrorPayload = {};
+        let errorData: Record<string, unknown> = {};
         try {
-          errorData = await response.json();
+          errorData = (await response.json()) as Record<string, unknown>;
         } catch {
           errorData = {};
         }
 
         const status = response.status;
+        const errorMessage = typeof errorData.message === 'string' ? errorData.message : undefined;
 
         // 401 Unauthorized
         if (status === 401) {
-          const rawError = errorData.erreur || 'jeton_invalide';
+          const rawError = errorData.erreur;
 
           // Attempt transparent token refresh on token expiration
           if (rawError === 'jeton_expire' && !skipAutoRefresh) {
@@ -169,7 +156,7 @@ class HttpClient {
           throw {
             type: 'AUTH',
             reason: mapApiAuthReason(rawError),
-            message: errorData.message || 'Authentication required.',
+            message: errorMessage || 'Authentication required.',
           } satisfies AuthError;
         }
 
@@ -178,7 +165,7 @@ class HttpClient {
           throw {
             type: 'AUTH',
             reason: 'insufficient_permissions',
-            message: errorData.message || 'Insufficient permissions for this action.',
+            message: errorMessage || 'Insufficient permissions for this action.',
           } satisfies AuthError;
         }
 
@@ -186,18 +173,21 @@ class HttpClient {
         if (status === 409) {
           throw {
             type: 'CONFLICT',
-            message: errorData.message || 'Version conflict detected.',
+            message: errorMessage || 'Version conflict detected.',
             serverState: errorData.serveur,
-            expectedVersion: errorData.versionAttendue,
+            expectedVersion: typeof errorData.versionAttendue === 'number' ? errorData.versionAttendue : undefined,
           } satisfies ConflictError;
         }
 
         // 422 Validation Error
         if (status === 422) {
+          const fields = typeof errorData.champs === 'object' && errorData.champs !== null
+            ? (errorData.champs as Record<string, string>)
+            : {};
           throw {
             type: 'VALIDATION',
-            fields: errorData.champs || {},
-            message: errorData.message || 'Field validation error.',
+            fields,
+            message: errorMessage || 'Field validation error.',
           } satisfies ValidationError;
         }
 
@@ -219,10 +209,10 @@ class HttpClient {
         throw {
           type: 'SERVER',
           httpCode: status,
-          message: errorData.message || `Server error (${status}).`,
+          message: errorMessage || `Server error (${status}).`,
         } satisfies ServerError;
 
-      } catch (err) {
+      } catch (err: unknown) {
         // Re-throw typed domain errors
         if (isAppError(err)) {
           throw err;
@@ -235,9 +225,10 @@ class HttpClient {
           continue;
         }
 
+        const msg = err instanceof Error ? err.message : 'Network connection failure.';
         throw {
           type: 'NETWORK',
-          message: err instanceof Error && err.message ? err.message : 'Network connection failure.',
+          message: msg,
           cause: err,
         } satisfies NetworkError;
       }
