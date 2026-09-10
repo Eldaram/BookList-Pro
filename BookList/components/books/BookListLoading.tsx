@@ -6,7 +6,7 @@ import { useTheme } from "../../features/theme/ThemeProvider";
 export default function BookListLoading() {
   const { colors } = useTheme();
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}> 
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <ActivityIndicator size="large" color={colors.text} />
     </View>
   );

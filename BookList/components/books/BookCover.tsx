@@ -9,7 +9,14 @@ type Props = {
 export default function BookCover({ uri }: Props) {
   const { colors } = useTheme();
   if (!uri) {
-      return <View style={[styles.placeholder, { backgroundColor: colors.coverPlaceholder }]} />;
+    return (
+      <View
+        style={[
+          styles.placeholder,
+          { backgroundColor: colors.coverPlaceholder },
+        ]}
+      />
+    );
   }
   return <Image source={{ uri }} style={styles.cover} resizeMode="cover" />;
 }

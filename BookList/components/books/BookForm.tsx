@@ -59,45 +59,80 @@ export default function BookForm({ mode, book }: Props) {
   };
 
   return (
-    <ScrollView style={[styles.scroll, { backgroundColor: colors.background }]} contentContainerStyle={styles.container}>
-      <View style={[styles.card, { backgroundColor: colors.background, borderColor: colors.coverPlaceholder }]}>
+    <ScrollView
+      style={[styles.scroll, { backgroundColor: colors.background }]}
+      contentContainerStyle={styles.container}
+    >
+      <View
+        style={[
+          styles.card,
+          {
+            backgroundColor: colors.background,
+            borderColor: colors.coverPlaceholder,
+          },
+        ]}
+      >
         <View style={styles.coverWrapper}>
           <BookCover uri={couverture} />
         </View>
         <View style={styles.info}>
-          <Text style={[styles.heading, { color: colors.text }]}> 
+          <Text style={[styles.heading, { color: colors.text }]}>
             {mode === "CREATE" ? t("form.createTitle") : t("form.updateTitle")}
           </Text>
-          <Text style={[styles.label, { color: colors.text }]}>{t("form.title")}</Text>
+          <Text style={[styles.label, { color: colors.text }]}>
+            {t("form.title")}
+          </Text>
           <TextInput
-            style={[styles.input, { borderColor: colors.coverPlaceholder, color: colors.text }, fieldError("titre") && { borderColor: colors.danger }]}
+            style={[
+              styles.input,
+              { borderColor: colors.coverPlaceholder, color: colors.text },
+              fieldError("titre") && { borderColor: colors.danger },
+            ]}
             value={titre}
             onChangeText={setTitre}
           />
           {fieldError("titre") && (
             <Text style={styles.fieldError}>{fieldError("titre")}</Text>
           )}
-          <Text style={[styles.label, { color: colors.text }]}>{t("form.author")}</Text>
+          <Text style={[styles.label, { color: colors.text }]}>
+            {t("form.author")}
+          </Text>
           <TextInput
-            style={[styles.input, { borderColor: colors.coverPlaceholder, color: colors.text }, fieldError("auteur") && { borderColor: colors.danger }]}
+            style={[
+              styles.input,
+              { borderColor: colors.coverPlaceholder, color: colors.text },
+              fieldError("auteur") && { borderColor: colors.danger },
+            ]}
             value={auteur}
             onChangeText={setAuteur}
           />
           {fieldError("auteur") && (
             <Text style={styles.fieldError}>{fieldError("auteur")}</Text>
           )}
-          <Text style={[styles.label, { color: colors.text }]}>{t("form.publisher")}</Text>
+          <Text style={[styles.label, { color: colors.text }]}>
+            {t("form.publisher")}
+          </Text>
           <TextInput
-            style={[styles.input, { borderColor: colors.coverPlaceholder, color: colors.text }, fieldError("editeur") && { borderColor: colors.danger }]}
+            style={[
+              styles.input,
+              { borderColor: colors.coverPlaceholder, color: colors.text },
+              fieldError("editeur") && { borderColor: colors.danger },
+            ]}
             value={editeur}
             onChangeText={setEditeur}
           />
           {fieldError("editeur") && (
             <Text style={styles.fieldError}>{fieldError("editeur")}</Text>
           )}
-          <Text style={[styles.label, { color: colors.text }]}>{t("form.year")}</Text>
+          <Text style={[styles.label, { color: colors.text }]}>
+            {t("form.year")}
+          </Text>
           <TextInput
-            style={[styles.input, { borderColor: colors.coverPlaceholder, color: colors.text }, fieldError("annee") && { borderColor: colors.danger }]}
+            style={[
+              styles.input,
+              { borderColor: colors.coverPlaceholder, color: colors.text },
+              fieldError("annee") && { borderColor: colors.danger },
+            ]}
             value={annee}
             onChangeText={setAnnee}
             keyboardType="numeric"
@@ -106,7 +141,9 @@ export default function BookForm({ mode, book }: Props) {
             <Text style={styles.fieldError}>{fieldError("annee")}</Text>
           )}
           {error && error.type !== "VALIDATION" && (
-            <Text style={[styles.error, { color: colors.danger }]}>{error.message}</Text>
+            <Text style={[styles.error, { color: colors.danger }]}>
+              {error.message}
+            </Text>
           )}
           <SaveButton onPress={submit} label={t("form.save")} />
         </View>

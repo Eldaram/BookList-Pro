@@ -36,7 +36,9 @@ export default function BookList() {
   if (error) {
     return (
       <View style={[styles.container, { backgroundColor: colors.background }]}>
-        <Text style={[styles.errorMessage, { color: colors.textMuted }]}>{error.message}</Text>
+        <Text style={[styles.errorMessage, { color: colors.textMuted }]}>
+          {error.message}
+        </Text>
       </View>
     );
   }
@@ -67,10 +69,16 @@ export default function BookList() {
             onPress={() => router.push(`/books/${item.id}`)}
           >
             <BookCover uri={item.couverture} />
-            <Text style={[styles.bookTitle, { color: colors.text }]} numberOfLines={2}>
+            <Text
+              style={[styles.bookTitle, { color: colors.text }]}
+              numberOfLines={2}
+            >
               {item.titre}
             </Text>
-            <Text style={[styles.bookAuthor, { color: colors.textMuted }]} numberOfLines={1}>
+            <Text
+              style={[styles.bookAuthor, { color: colors.textMuted }]}
+              numberOfLines={1}
+            >
               {item.auteur}
             </Text>
           </Pressable>

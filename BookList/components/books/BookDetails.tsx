@@ -16,7 +16,15 @@ export default function BookDetails({ book }: { book: Book }) {
       style={[styles.scroll, { backgroundColor: colors.background }]}
       contentContainerStyle={styles.container}
     >
-      <View style={[styles.card, { backgroundColor: colors.background, borderColor: colors.coverPlaceholder }]}>
+      <View
+        style={[
+          styles.card,
+          {
+            backgroundColor: colors.background,
+            borderColor: colors.coverPlaceholder,
+          },
+        ]}
+      >
         <View style={styles.editButton}>
           <UpdateButton
             onPress={() =>
@@ -28,8 +36,12 @@ export default function BookDetails({ book }: { book: Book }) {
           <BookCover uri={book.couverture} />
         </View>
         <View style={styles.info}>
-          <Text style={[styles.title, { color: colors.text }]}>{book.titre}</Text>
-          <Text style={[styles.author, { color: colors.textMuted }]}>{book.auteur}</Text>
+          <Text style={[styles.title, { color: colors.text }]}>
+            {book.titre}
+          </Text>
+          <Text style={[styles.author, { color: colors.textMuted }]}>
+            {book.auteur}
+          </Text>
           <Text style={[styles.description, { color: colors.text }]}>
             {book.editeur} · {book.annee}
             {book.note !== null ? ` · Note : ${book.note}/5` : ""}

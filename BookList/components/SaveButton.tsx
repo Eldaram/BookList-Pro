@@ -15,13 +15,19 @@ export default function SaveButton({
   const { colors } = useTheme();
   return (
     <TouchableOpacity
-      style={[styles.button, { backgroundColor: colors.primary }, disabled && styles.disabled]}
+      style={[
+        styles.button,
+        { backgroundColor: colors.primary },
+        disabled && styles.disabled,
+      ]}
       onPress={onPress}
       disabled={disabled}
       accessibilityRole="button"
       accessibilityLabel={label}
     >
-      <Text style={[styles.text, { color: colors.textOnPrimary }]}>{label}</Text>
+      <Text style={[styles.text, { color: colors.textOnPrimary }]}>
+        {label}
+      </Text>
     </TouchableOpacity>
   );
 }
