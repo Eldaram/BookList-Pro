@@ -1,4 +1,7 @@
-import { toggleBookFavori } from "../features/books/bookFlagToggle";
+import {
+  toggleBookFavori,
+  toggleBookLu,
+} from "../features/books/bookFlagToggle";
 import {
   getCachedBook,
   replaceCachedBooks,
@@ -148,5 +151,82 @@ describe("Favorite feature Suite", () => {
     await toggleBookFavori(book);
 
     expect(getCachedBook("uuid-2")).toEqual(otherBook);
+  });
+});
+
+describe("Read status feature Suite", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    replaceCachedBooks([makeBook()]);
+  });
+
+  it("should call the API with a partial PATCH { lu } as required by the API contract", async () => {
+    const book = makeBook();
+    (booksApi.patchBook as jest.Mock).mockResolvedValue({
+      ...book,
+      lu: true,
+      version: 2,
+    });
+
+    await toggleBookLu(book);
+
+    expect(booksApi.patchBook).toHaveBeenCalledTimes(1);
+    expect(booksApi.patchBook).toHaveBeenCalledWith("uuid-1", { lu: true });
+  });
+
+  it("should optimistically toggle lu in the cache before the API responds", async () => {
+    const book = makeBook();
+    const pending = deferred<Book>();
+    (booksApi.patchBook as jest.Mock).mockReturnValue(pending.promise);
+
+    const toggling = toggleBookLu(book);
+
+    // Le chip doit changer instantanement : le cache est deja a jour.
+    expect(getCachedBook("uuid-1")?.lu).toBe(true);
+
+    pending.resolve({ ...book, lu: true, version: 2 });
+    await toggling;
+  });
+
+  it("should roll back the cache when the API rejects the mutation", async () => {
+    const book = makeBook();
+    (booksApi.patchBook as jest.Mock).mockRejectedValue({
+      type: "NETWORK",
+      message: "API indisponible",
+    });
+
+    await toggleBookLu(book);
+
+    expect(getCachedBook("uuid-1")?.lu).toBe(false);
+  });
+
+  it("should toggle back from lu=true to lu=false", async () => {
+    const book = makeBook({ lu: true });
+    replaceCachedBooks([book]);
+    (booksApi.patchBook as jest.Mock).mockResolvedValue({
+      ...book,
+      lu: false,
+      version: 2,
+    });
+
+    await toggleBookLu(book);
+
+    expect(booksApi.patchBook).toHaveBeenCalledWith("uuid-1", { lu: false });
+    expect(getCachedBook("uuid-1")?.lu).toBe(false);
+  });
+
+  it("should not touch the favori flag when toggling lu", async () => {
+    const book = makeBook({ favori: true });
+    replaceCachedBooks([book]);
+    (booksApi.patchBook as jest.Mock).mockResolvedValue({
+      ...book,
+      lu: true,
+      version: 2,
+    });
+
+    await toggleBookLu(book);
+
+    expect(booksApi.patchBook).toHaveBeenCalledWith("uuid-1", { lu: true });
+    expect(getCachedBook("uuid-1")?.favori).toBe(true);
   });
 });

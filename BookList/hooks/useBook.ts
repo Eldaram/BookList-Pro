@@ -7,7 +7,10 @@ import {
   subscribeBooksCache,
   upsertCachedBook,
 } from "../features/books/booksCache";
-import { toggleBookFavori, toggleBookLu } from "../features/books/bookFlagToggle";
+import {
+  toggleBookFavori,
+  toggleBookLu,
+} from "../features/books/bookFlagToggle";
 
 export function useBook(id: string | undefined) {
   const [book, setBook] = useState<Book | null>(() =>
