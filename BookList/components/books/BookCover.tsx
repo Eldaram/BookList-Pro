@@ -1,7 +1,7 @@
 import React from "react";
 import { Image, StyleSheet, View } from "react-native";
 import { useTheme } from "../../features/theme/ThemeProvider";
-import { resolveCoverUri } from "../../services/repository/coverRepository";
+import { resolveCoverUri } from "../../services/servicesImpl/coverServiceImpl";
 
 type Props = {
   uri: string | null;

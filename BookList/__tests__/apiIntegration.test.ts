@@ -1,7 +1,7 @@
 import { spawn, ChildProcess } from "child_process";
 import path from "path";
 import { authService } from "../services/auth/authService";
-import { bookRepository } from "../services/repository/bookRepository";
+import { bookRepository } from "../services/servicesImpl/bookServiceImpl";
 import { httpClient } from "../services/api/httpClient";
 
 const API_DIR = path.resolve(__dirname, "../../api-books-v2");

@@ -15,7 +15,7 @@ import { booksList } from "../../features/books/booksList";
 import { spacing, typography } from "../../theme/tokens";
 import { useTheme } from "../../features/theme/ThemeProvider";
 import { useI18n } from "../../features/i18n/I18nProvider";
-import { pickCoverImage } from "../../services/repository/coverRepository";
+import { pickCoverImage } from "../../services/servicesImpl/coverServiceImpl";
 import SaveButton from "../SaveButton";
 import BookCover from "./BookCover";
 

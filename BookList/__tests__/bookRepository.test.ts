@@ -1,4 +1,4 @@
-import { bookRepository } from "../services/repository/bookRepository";
+import { bookRepository } from "../services/servicesImpl/bookServiceImpl";
 import { booksApi } from "../services/api/booksApi";
 
 jest.mock("../services/api/booksApi");

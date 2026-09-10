@@ -1,4 +1,4 @@
-import { bookRepository } from "../../services/repository/bookRepository";
+import { bookRepository } from "../../services/servicesImpl/bookServiceImpl";
 import { BookInput } from "../../domain/book";
 
 export const booksList = {

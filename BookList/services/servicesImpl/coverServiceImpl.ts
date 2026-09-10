@@ -18,7 +18,7 @@ export function resolveCoverUri(
 
 /**
  * Ouvre le selecteur d'images, redimensionne cote client puis encode en
- * base64 (data URI) pour rester sous la limite de payload de l'API.
+ * m (data URI) pour rester sous la limite de payload de l'API.
  * Retourne null si l'utilisateur annule ou refuse la permission.
  */
 export async function pickCoverImage(): Promise<string | null> {
