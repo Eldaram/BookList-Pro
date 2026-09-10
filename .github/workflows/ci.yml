@@ -24,7 +24,7 @@ jobs:
 
       - name: Install API dependencies
         working-directory: api-books-v2
-        run: npm ci
+        run: npm install
 
       - name: Install BookList dependencies
         working-directory: BookList
