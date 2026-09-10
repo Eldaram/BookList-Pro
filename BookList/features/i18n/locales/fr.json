@@ -23,6 +23,23 @@
     "allLoaded": "Tous les livres sont chargés",
     "error": "Impossible de charger les livres",
     "retry": "Réessayer",
+    "search": {
+      "placeholder": "Rechercher par titre ou auteur…"
+    },
+    "filters": {
+      "read": "Lus",
+      "unread": "Non lus",
+      "favorites": "Coups de cœur"
+    },
+    "sort": {
+      "label": "Tri",
+      "titre": "Titre",
+      "auteur": "Auteur",
+      "annee": "Année",
+      "note": "Note",
+      "orderAsc": "Ordre croissant",
+      "orderDesc": "Ordre décroissant"
+    },
     "delete": {
       "action": "Supprimer le livre",
       "confirmTitle": "Supprimer cet ouvrage ?",

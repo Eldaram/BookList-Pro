@@ -2,8 +2,8 @@ import { bookServiceImpl } from "../../services/servicesImpl/bookServiceImpl";
 import { BookFilters, BookInput } from "../../domain/book";
 
 export const booksList = {
-  getBooks: async (filters?: BookFilters) => {
-    return await bookServiceImpl.getBooks(filters);
+  getBooks: async (filters?: BookFilters, signal?: AbortSignal) => {
+    return await bookServiceImpl.getBooks(filters, signal);
   },
   getBookById: async (id: string) => {
     return await bookServiceImpl.getBookById(id);

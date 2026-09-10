@@ -8,7 +8,10 @@ import {
 } from "../../domain/book";
 
 class BooksApi {
-  async getBooks(filters: BookFilters = {}): Promise<PaginatedBooks> {
+  async getBooks(
+    filters: BookFilters = {},
+    signal?: AbortSignal,
+  ): Promise<PaginatedBooks> {
     const params = new URLSearchParams();
     if (filters.page !== undefined) params.append("page", String(filters.page));
     if (filters.limit !== undefined)
@@ -26,6 +29,7 @@ class BooksApi {
     return httpClient.request<PaginatedBooks>(endpoint, {
       method: "GET",
       schema: paginatedBooksSchema,
+      signal,
     });
   }
 
