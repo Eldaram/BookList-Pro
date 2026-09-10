@@ -9,8 +9,10 @@ export default function BooksScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{t("app.title")}</Text>
-      <Text style={styles.subtitle}>{t("app.subtitle")}</Text>
+      <View style={styles.header}>
+        <Text style={styles.title}>{t("app.title")}</Text>
+        <Text style={styles.subtitle}>{t("app.subtitle")}</Text>
+      </View>
       <BookList />
       <StatusBar style="auto" />
     </View>
@@ -19,10 +21,14 @@ export default function BooksScreen() {
 
 const styles = StyleSheet.create({
   container: {
-    alignItems: "center",
+    alignSelf: "stretch",
     flex: 1,
-    justifyContent: "center",
-    padding: spacing.lg,
+    paddingHorizontal: spacing.md,
+    paddingTop: spacing.lg,
+  },
+  header: {
+    alignItems: "center",
+    marginBottom: spacing.md,
   },
   subtitle: {
     fontSize: typography.body,

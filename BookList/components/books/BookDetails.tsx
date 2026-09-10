@@ -22,7 +22,6 @@ type Props = {
 };
 
 export default function BookDetails({ book, onToggleFavorite }: Props) {
-
   const router = useRouter();
   const { colors } = useTheme();
   const { t } = useI18n();

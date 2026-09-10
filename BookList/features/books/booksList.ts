@@ -1,9 +1,9 @@
 import { bookServiceImpl } from "../../services/servicesImpl/bookServiceImpl";
-import { BookInput } from "../../domain/book";
+import { BookFilters, BookInput } from "../../domain/book";
 
 export const booksList = {
-  getBooks: async () => {
-    return await bookServiceImpl.getBooks();
+  getBooks: async (filters?: BookFilters) => {
+    return await bookServiceImpl.getBooks(filters);
   },
   getBookById: async (id: string) => {
     return await bookServiceImpl.getBookById(id);
@@ -22,6 +22,6 @@ export const booksList = {
     return await bookServiceImpl.deleteBook(id);
   },
   patchBook: async (id: string, patch: Partial<BookInput>) => {
-    return await bookRepository.patchBook(id, patch);
+    return await bookServiceImpl.patchBook(id, patch);
   },
 };

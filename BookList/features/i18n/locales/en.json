@@ -19,6 +19,8 @@
     "form": "Book form",
     "empty": "No books yet",
     "loading": "Loading books…",
+    "loadingMore": "Loading more books…",
+    "allLoaded": "All books loaded",
     "error": "Unable to load books",
     "retry": "Retry",
     "delete": {
