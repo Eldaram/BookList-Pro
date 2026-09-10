@@ -60,10 +60,10 @@ export function useBooks(): BooksContextValue {
     refreshing: false,
     error: localError,
     scrollOffset: 0,
-    fetchNextPage: async () => { },
-    refresh: async () => { },
-    setScrollOffset: () => { },
-    addBookToList: () => { },
-    updateBookInList: () => { },
+    fetchNextPage: async () => {},
+    refresh: async () => {},
+    setScrollOffset: () => {},
+    addBookToList: () => {},
+    updateBookInList: () => {},
   };
 }
