@@ -5,11 +5,10 @@ import { booksList } from "../features/books/booksList";
 import {
   getCachedBook,
   getCachedBooks,
-  patchCachedBook,
   replaceCachedBooks,
   subscribeBooksCache,
-  upsertCachedBook,
 } from "../features/books/booksCache";
+import { toggleBookFavori } from "../features/books/favoriteToggle";
 //Ajoute la couverture des livres dans le hook useBooks
 
 export function useBooks() {
@@ -42,24 +41,11 @@ export function useBooks() {
     fetchBooks();
   }, []);
 
-  // Bascule optimiste : l'icone change instantanement, retour arriere si
-  // l'API refuse la mutation.
   const toggleFavorite = useCallback(
     (id: string) => {
       const current = getCachedBook(id) ?? books.find((b) => b.id === id);
       if (!current) return;
-      const nextFavori = !current.favori;
-
-      patchCachedBook(id, { favori: nextFavori });
-
-      booksList
-        .patchBook(id, { favori: nextFavori })
-        .then((savedBook) => {
-          upsertCachedBook(savedBook);
-        })
-        .catch(() => {
-          patchCachedBook(id, { favori: current.favori });
-        });
+      toggleBookFavori(current);
     },
     [books],
   );

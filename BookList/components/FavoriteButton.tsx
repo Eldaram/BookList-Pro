@@ -1,5 +1,9 @@
 import React from "react";
-import { GestureResponderEvent, StyleSheet, TouchableOpacity } from "react-native";
+import {
+  GestureResponderEvent,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useTheme } from "../features/theme/ThemeProvider";
 import { useI18n } from "../features/i18n/I18nProvider";
