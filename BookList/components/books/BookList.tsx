@@ -1,14 +1,16 @@
 import React from 'react';
-import { FlatList, Text, View, StyleSheet, useWindowDimensions } from 'react-native';
+import { FlatList, Pressable, Text, View, StyleSheet, useWindowDimensions } from 'react-native';
+import { useRouter } from 'expo-router';
 import { colors, spacing, typography } from '../../theme/tokens';
 import { useBooks } from '../../hooks/useBooks';
 import BookCover from './BookCover';
 import BookListLoading from './BookListLoading';
+import AddButton from '../AddButton';
 
-// Largeur cible d'une carte : le nombre de colonnes s'adapte a l'ecran
 const CELL_TARGET_WIDTH = 160;
 
 export default function BookList() {
+  const router = useRouter();
   const { books, loading, error } = useBooks();
   const { width } = useWindowDimensions();
   const numColumns = Math.max(
@@ -37,7 +39,11 @@ export default function BookList() {
   }
 
   return (
-    <FlatList
+    <>
+      <View style={styles.toolbar}>
+        <AddButton onPress={() => router.push('/books/form?mode=CREATE')} />
+      </View>
+      <FlatList
       key={numColumns}
       data={books}
       keyExtractor={(item) => item.id}
@@ -45,7 +51,10 @@ export default function BookList() {
       style={styles.list}
       contentContainerStyle={styles.grid}
       renderItem={({ item }) => (
-        <View style={[styles.cell, { flex: 1 / numColumns }]}>
+        <Pressable
+          style={[styles.cell, { flex: 1 / numColumns }]}
+          onPress={() => router.push(`/books/${item.id}`)}
+        >
           <BookCover uri={item.couverture} />
           <Text style={styles.bookTitle} numberOfLines={2}>
             {item.titre}
@@ -53,9 +62,10 @@ export default function BookList() {
           <Text style={styles.bookAuthor} numberOfLines={1}>
             {item.auteur}
           </Text>
-        </View>
+        </Pressable>
       )}
     />
+    </>
   );
 }
 
@@ -75,6 +85,10 @@ const styles = StyleSheet.create({
   grid: {
     backgroundColor: colors.background,
     padding: spacing.md,
+  },
+  toolbar: {
+    alignItems: 'flex-end',
+    alignSelf: 'stretch',
   },
   list: {
     alignSelf: 'stretch',

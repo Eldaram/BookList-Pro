@@ -2,19 +2,17 @@ import { useEffect, useState } from 'react';
 import { Book } from '../domain/book';
 import { AppError, isAppError } from '../domain/error';
 import { booksList } from '../features/books/booksList';
-//Ajoute la couverture des livres dans le hook useBooks
 
-
-export function useBooks() {
-  const [books, setBooks] = useState<Book[]>([]);
+export function useBook(id: string | undefined) {
+  const [book, setBook] = useState<Book | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<AppError | null>(null);
 
   useEffect(() => {
-    const fetchBooks = async () => {
+    if (!id) return;
+    const fetchBook = async () => {
       try {
-        const response = await booksList.getBooks();
-        setBooks(response.items);
+        setBook(await booksList.getBookById(id));
       } catch (err) {
         setError(
           isAppError(err)
@@ -25,8 +23,8 @@ export function useBooks() {
         setLoading(false);
       }
     };
-    fetchBooks();
-  }, []);
+    fetchBook();
+  }, [id]);
 
-  return { books, loading, error };
+  return { book, loading, error };
 }
