@@ -40,6 +40,16 @@
       "orderAsc": "Ascending order",
       "orderDesc": "Descending order"
     },
+    "favorite": {
+      "add": "Add to favorites",
+      "remove": "Remove from favorites"
+    },
+    "read": {
+      "read": "Read",
+      "notRead": "Not read",
+      "markRead": "Mark as read",
+      "markUnread": "Mark as unread"
+    },
     "delete": {
       "action": "Delete the book",
       "confirmTitle": "Delete this book?",
@@ -50,6 +60,14 @@
       "undo": "Undo",
       "error": "Unable to delete this book."
     }
+  },
+  "notes": {
+    "title": "Reading notes",
+    "placeholder": "Add a note…",
+    "add": "Add the note",
+    "delete": "Delete the note",
+    "empty": "No notes yet.",
+    "error": "Unable to save the notes operation."
   },
   "form": {
     "createTitle": "Add a book",

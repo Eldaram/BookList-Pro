@@ -40,6 +40,16 @@
       "orderAsc": "Ordre croissant",
       "orderDesc": "Ordre décroissant"
     },
+    "favorite": {
+      "add": "Ajouter aux coups de cœur",
+      "remove": "Retirer des coups de cœur"
+    },
+    "read": {
+      "read": "Lu",
+      "notRead": "Non lu",
+      "markRead": "Marquer comme lu",
+      "markUnread": "Marquer comme non lu"
+    },
     "delete": {
       "action": "Supprimer le livre",
       "confirmTitle": "Supprimer cet ouvrage ?",
@@ -50,6 +60,14 @@
       "undo": "Annuler",
       "error": "Impossible de supprimer ce livre."
     }
+  },
+  "notes": {
+    "title": "Notes de lecture",
+    "placeholder": "Ajouter une note…",
+    "add": "Ajouter la note",
+    "delete": "Supprimer la note",
+    "empty": "Aucune note pour le moment.",
+    "error": "Impossible d'enregistrer l'opération sur les notes."
   },
   "form": {
     "createTitle": "Ajouter un livre",

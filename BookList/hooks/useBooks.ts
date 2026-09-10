@@ -12,7 +12,7 @@ import {
   replaceCachedBooks,
   subscribeBooksCache,
 } from "../features/books/booksCache";
-import { toggleBookFavori } from "../features/books/favoriteToggle";
+import { toggleBookFavori } from "../features/books/bookFlagToggle";
 //Ajoute la couverture des livres dans le hook useBooks
 
 export function useBooks(): BooksContextValue {

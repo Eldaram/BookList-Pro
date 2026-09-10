@@ -7,7 +7,10 @@ import {
   subscribeBooksCache,
   upsertCachedBook,
 } from "../features/books/booksCache";
-import { toggleBookFavori } from "../features/books/favoriteToggle";
+import {
+  toggleBookFavori,
+  toggleBookLu,
+} from "../features/books/bookFlagToggle";
 
 export function useBook(id: string | undefined) {
   const [book, setBook] = useState<Book | null>(() =>
@@ -51,5 +54,10 @@ export function useBook(id: string | undefined) {
     toggleBookFavori(book);
   }, [book]);
 
-  return { book, loading, error, toggleFavorite };
+  const toggleRead = useCallback(() => {
+    if (!book) return;
+    toggleBookLu(book);
+  }, [book]);
+
+  return { book, loading, error, toggleFavorite, toggleRead };
 }
