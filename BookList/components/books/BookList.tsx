@@ -1,49 +1,31 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { FlatList, Text, View, StyleSheet, useWindowDimensions } from 'react-native';
 import { colors, spacing, typography } from '../../theme/tokens';
-import { booksList } from '../../features/books/booksList';
-import { Book } from '../../domain/book';
-import { AppError, isAppError } from '../../domain/error';
+import { useBooks } from '../../hooks/useBooks';
 import BookCover from './BookCover';
-import BookListError from './BookListError';
 import BookListLoading from './BookListLoading';
 
 // Largeur cible d'une carte : le nombre de colonnes s'adapte a l'ecran
 const CELL_TARGET_WIDTH = 160;
 
 export default function BookList() {
-  const [books, setBooks] = useState<Book[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<AppError | null>(null);
+  const { books, loading, error } = useBooks();
   const { width } = useWindowDimensions();
   const numColumns = Math.max(
     2,
     Math.floor(width / (CELL_TARGET_WIDTH + spacing.md * 2))
   );
-  useEffect(() => {
-    const fetchBooks = async () => {
-      try {
-        const response = await booksList.getBooks();
-        setBooks(response.items);
-      } catch (err) {
-        setError(
-          isAppError(err)
-            ? err
-            : { type: 'NETWORK', message: 'Unexpected error', cause: err }
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchBooks();
-  }, []);
 
   if (loading) {
     return <BookListLoading />;
   }
 
   if (error) {
-    return <BookListError error={error} />;
+    return (
+      <View style={styles.container}>
+        <Text style={styles.errorMessage}>{error.message}</Text>
+      </View>
+    );
   }
 
   if (books.length === 0) {
@@ -84,6 +66,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     padding: spacing.lg,
+  },
+  errorMessage: {
+    color: colors.textMuted,
+    fontSize: typography.body,
+    textAlign: 'center',
   },
   grid: {
     backgroundColor: colors.background,
