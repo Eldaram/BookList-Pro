@@ -5,9 +5,15 @@ import BookCover from "./BookCover";
 import { Book } from "../../domain/book";
 import { spacing, typography } from "../../theme/tokens";
 import { useTheme } from "../../features/theme/ThemeProvider";
+import FavoriteButton from "../FavoriteButton";
 import UpdateButton from "../UpdateButton";
 
-export default function BookDetails({ book }: { book: Book }) {
+type Props = {
+  book: Book;
+  onToggleFavorite: () => void;
+};
+
+export default function BookDetails({ book, onToggleFavorite }: Props) {
   const router = useRouter();
   const { colors } = useTheme();
 
@@ -36,9 +42,12 @@ export default function BookDetails({ book }: { book: Book }) {
           <BookCover uri={book.couverture} />
         </View>
         <View style={styles.info}>
-          <Text style={[styles.title, { color: colors.text }]}>
-            {book.titre}
-          </Text>
+          <View style={styles.titleRow}>
+            <Text style={[styles.title, { color: colors.text }]}>
+              {book.titre}
+            </Text>
+            <FavoriteButton favori={book.favori} onPress={onToggleFavorite} />
+          </View>
           <Text style={[styles.author, { color: colors.textMuted }]}>
             {book.auteur}
           </Text>
@@ -84,10 +93,15 @@ const styles = StyleSheet.create({
   info: {
     flex: 1,
   },
+  titleRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: spacing.md,
+    marginBottom: spacing.md,
+  },
   title: {
     fontSize: typography.title,
     fontWeight: "700",
-    marginBottom: spacing.md,
   },
   author: {
     fontSize: typography.body,

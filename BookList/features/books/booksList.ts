@@ -18,4 +18,7 @@ export const booksList = {
   ) => {
     return await bookRepository.updateBook(id, input, expectedVersion);
   },
+  patchBook: async (id: string, patch: Partial<BookInput>) => {
+    return await bookRepository.patchBook(id, patch);
+  },
 };
