@@ -1,5 +1,5 @@
 import { booksList } from "../features/books/booksList";
-import { bookRepository } from "../services/servicesImpl/bookServiceImpl";
+import { bookServiceImpl } from "../services/servicesImpl/bookServiceImpl";
 
 jest.mock("../services/servicesImpl/bookServiceImpl");
 
@@ -32,11 +32,11 @@ describe("Books Pagination Feature Suite", () => {
       totalPages: 2,
     };
 
-    (bookRepository.getBooks as jest.Mock).mockResolvedValue(mockPaginated);
+    (bookServiceImpl.getBooks as jest.Mock).mockResolvedValue(mockPaginated);
 
     const result = await booksList.getBooks({ page: 2, limit: 10 });
 
-    expect(bookRepository.getBooks).toHaveBeenCalledWith({
+    expect(bookServiceImpl.getBooks).toHaveBeenCalledWith({
       page: 2,
       limit: 10,
     });

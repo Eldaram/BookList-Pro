@@ -1,4 +1,5 @@
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useRef, useEffect, useContext, useState } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import { Book } from "../domain/book";
 import { AppError, isAppError } from "../domain/error";
 import {
@@ -59,10 +60,10 @@ export function useBooks(): BooksContextValue {
     refreshing: false,
     error: localError,
     scrollOffset: 0,
-    fetchNextPage: async () => {},
-    refresh: async () => {},
-    setScrollOffset: () => {},
-    addBookToList: () => {},
-    updateBookInList: () => {},
+    fetchNextPage: async () => { },
+    refresh: async () => { },
+    setScrollOffset: () => { },
+    addBookToList: () => { },
+    updateBookInList: () => { },
   };
 }

@@ -1,7 +1,7 @@
 import { spawn, ChildProcess } from "child_process";
 import path from "path";
 import { authService } from "../services/auth/authService";
-import { bookRepository } from "../services/servicesImpl/bookServiceImpl";
+import { bookServiceImpl } from "../services/servicesImpl/bookServiceImpl";
 import { httpClient } from "../services/api/httpClient";
 
 const API_DIR = path.resolve(__dirname, "../../api-books-v2");
@@ -71,7 +71,7 @@ describe("Real API Connection & Integration Suite", () => {
   });
 
   it("should fetch live paginated books from real api-books-v2 database via bookRepository", async () => {
-    const paginated = await bookRepository.getBooks({ limit: 5 });
+    const paginated = await bookServiceImpl.getBooks({ limit: 5 });
 
     expect(paginated.items.length).toBeGreaterThan(0);
     expect(paginated.limit).toBe(5);

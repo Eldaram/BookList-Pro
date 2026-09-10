@@ -16,5 +16,5 @@ export default function BookDetailsPage() {
       </View>
     );
   }
-  return <BookDetails book={book} />;
+  return <BookDetails key={book.id} book={book} />;
 }
