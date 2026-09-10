@@ -11,6 +11,7 @@ import I18nSelector from "../components/i18n/i18n";
 import ThemeToggle from "../components/ui/ThemeToggle";
 import { I18nProvider } from "../features/i18n/I18nProvider";
 import { ThemeProvider, useTheme } from "../features/theme/ThemeProvider";
+import { BooksProvider } from "../features/books/BooksProvider";
 import { spacing } from "../theme/tokens";
 
 function ThemedApp() {
@@ -44,7 +45,9 @@ export default function RootLayout() {
   return (
     <ThemeProvider>
       <I18nProvider>
-        <ThemedApp />
+        <BooksProvider>
+          <ThemedApp />
+        </BooksProvider>
       </I18nProvider>
     </ThemeProvider>
   );

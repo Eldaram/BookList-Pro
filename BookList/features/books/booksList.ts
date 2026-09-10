@@ -1,9 +1,9 @@
 import { bookServiceImpl } from "../../services/servicesImpl/bookServiceImpl";
-import { BookInput } from "../../domain/book";
+import { BookFilters, BookInput } from "../../domain/book";
 
 export const booksList = {
-  getBooks: async () => {
-    return await bookServiceImpl.getBooks();
+  getBooks: async (filters?: BookFilters) => {
+    return await bookServiceImpl.getBooks(filters);
   },
   getBookById: async (id: string) => {
     return await bookServiceImpl.getBookById(id);

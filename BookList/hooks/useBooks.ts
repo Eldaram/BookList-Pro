@@ -1,49 +1,69 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useRef, useEffect, useContext, useState } from "react";
 import { useFocusEffect } from "@react-navigation/native";
 import { Book } from "../domain/book";
 import { AppError, isAppError } from "../domain/error";
+import {
+  BooksContext,
+  BooksContextValue,
+} from "../features/books/BooksProvider";
 import { booksList } from "../features/books/booksList";
-//Ajoute la couverture des livres dans le hook useBooks
 
-export function useBooks() {
-  const [books, setBooks] = useState<Book[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<AppError | null>(null);
-  const hasLoadedOnce = useRef(false);
+export function useBooks(): BooksContextValue {
+  const context = useContext(BooksContext);
 
-  // Refetch a chaque prise de focus : la liste reste montee en arriere-plan
-  // par le tab navigator, donc une suppression/creation ailleurs ne la met
-  // pas a jour sans ce mecanisme.
-  useFocusEffect(
-    useCallback(() => {
-      let active = true;
-      const fetchBooks = async () => {
-        if (!hasLoadedOnce.current) setLoading(true);
-        try {
-          const response = await booksList.getBooks();
-          if (!active) return;
-          setBooks(response.items);
-          setError(null);
-        } catch (err) {
-          if (!active) return;
-          setError(
+  // Fallback state if used outside BooksProvider (e.g. isolated legacy unit tests)
+  const [localBooks, setLocalBooks] = useState<Book[]>([]);
+  const [localLoading, setLocalLoading] = useState(true);
+  const [localError, setLocalError] = useState<AppError | null>(null);
+
+  useEffect(() => {
+    if (context) return;
+    let isMounted = true;
+    const fetchBooks = async () => {
+      try {
+        const response = await booksList.getBooks();
+        if (isMounted) {
+          setLocalBooks(response.items);
+        }
+      } catch (err) {
+        if (isMounted) {
+          setLocalError(
             isAppError(err)
               ? err
               : { type: "NETWORK", message: "Unexpected error", cause: err },
           );
-        } finally {
-          if (active) {
-            setLoading(false);
-            hasLoadedOnce.current = true;
-          }
         }
-      };
-      fetchBooks();
-      return () => {
-        active = false;
-      };
-    }, []),
-  );
+      } finally {
+        if (isMounted) {
+          setLocalLoading(false);
+        }
+      }
+    };
+    fetchBooks();
+    return () => {
+      isMounted = false;
+    };
+  }, [context]);
 
-  return { books, loading, error };
+  if (context) {
+    return context;
+  }
+
+  return {
+    books: localBooks,
+    page: 1,
+    totalPages: 1,
+    total: localBooks.length,
+    hasMore: false,
+    loading: localLoading,
+    loadingMore: false,
+    refreshing: false,
+    error: localError,
+    scrollOffset: 0,
+    fetchNextPage: async () => {},
+    refresh: async () => {},
+    setScrollOffset: () => {},
+    addBookToList: () => {},
+    updateBookInList: () => {},
+  };
 }
