@@ -1,55 +1,72 @@
-interface StorageEngine {
-  getItem(key: string): string | null | Promise<string | null>;
-  setItem(key: string, value: string): void | Promise<void>;
-  removeItem(key: string): void | Promise<void>;
-}
+import * as SecureStore from "expo-secure-store";
+
+const inMemoryStore = new Map<string, string>();
 
 /**
- * Abstraction for key-value storage.
- * Dynamically selects window.localStorage when running in browser,
- * falling back gracefully to an in-memory Map for Node/tests.
+ * Executes a SecureStore action if native storage is available,
+ * falling back gracefully to web localStorage or in-memory storage.
  */
-class SecureStorage {
-  private inMemoryStore = new Map<string, string>();
-
-  private get engine(): StorageEngine {
-    if (typeof window !== "undefined" && window.localStorage) {
-      return window.localStorage;
+async function executeWithFallback<T>(
+  secureAction: () => Promise<T>,
+  fallbackAction: () => T | Promise<T>,
+): Promise<T> {
+  try {
+    if (await SecureStore.isAvailableAsync()) {
+      return await secureAction();
     }
-    return {
-      getItem: (key) => this.inMemoryStore.get(key) ?? null,
-      setItem: (key, val) => {
-        this.inMemoryStore.set(key, val);
-      },
-      removeItem: (key) => {
-        this.inMemoryStore.delete(key);
-      },
-    };
+  } catch {
+    // SecureStore not available, continue to fallback
   }
 
-  async getSecureItem(key: string): Promise<string | null> {
-    try {
-      return await this.engine.getItem(key);
-    } catch {
-      return this.inMemoryStore.get(key) ?? null;
-    }
-  }
-
-  async setSecureItem(key: string, value: string): Promise<void> {
-    try {
-      await this.engine.setItem(key, value);
-    } catch {
-      this.inMemoryStore.set(key, value);
-    }
-  }
-
-  async removeSecureItem(key: string): Promise<void> {
-    try {
-      await this.engine.removeItem(key);
-    } catch {
-      this.inMemoryStore.delete(key);
-    }
+  try {
+    return await fallbackAction();
+  } catch {
+    return null as T;
   }
 }
 
-export const secureStorage = new SecureStorage();
+function getItemFallback(key: string): string | null {
+  if (typeof window !== "undefined" && window.localStorage) {
+    return window.localStorage.getItem(key);
+  }
+  return inMemoryStore.get(key) ?? null;
+}
+
+function setItemFallback(key: string, value: string): void {
+  if (typeof window !== "undefined" && window.localStorage) {
+    window.localStorage.setItem(key, value);
+  } else {
+    inMemoryStore.set(key, value);
+  }
+}
+
+function removeItemFallback(key: string): void {
+  if (typeof window !== "undefined" && window.localStorage) {
+    window.localStorage.removeItem(key);
+  } else {
+    inMemoryStore.delete(key);
+  }
+}
+
+export const secureStorage = {
+  async getSecureItem(key: string): Promise<string | null> {
+    return executeWithFallback(
+      () => SecureStore.getItemAsync(key),
+      () => getItemFallback(key),
+    );
+  },
+
+  async setSecureItem(key: string, value: string): Promise<void> {
+    await executeWithFallback(
+      () => SecureStore.setItemAsync(key, value),
+      () => setItemFallback(key, value),
+    );
+  },
+
+  async removeSecureItem(key: string): Promise<void> {
+    await executeWithFallback(
+      () => SecureStore.deleteItemAsync(key),
+      () => removeItemFallback(key),
+    );
+  },
+};

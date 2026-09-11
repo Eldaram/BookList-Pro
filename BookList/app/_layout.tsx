@@ -5,17 +5,22 @@ import {
 } from "@react-navigation/native";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, View } from "react-native";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
 
+import LoginForm from "../components/auth/LoginForm";
+import UserMenu from "../components/auth/UserMenu";
 import I18nSelector from "../components/i18n/i18n";
 import ThemeToggle from "../components/ui/ThemeToggle";
+import { AuthProvider, useAuth } from "../features/auth/AuthProvider";
+import { BooksProvider } from "../features/books/BooksProvider";
 import { I18nProvider } from "../features/i18n/I18nProvider";
 import { ThemeProvider, useTheme } from "../features/theme/ThemeProvider";
-import { BooksProvider } from "../features/books/BooksProvider";
 import { spacing } from "../theme/tokens";
 
 function ThemedApp() {
   const { mode, colors } = useTheme();
+  const { status, isLoading } = useAuth();
+
   const base = mode === "dark" ? DarkTheme : DefaultTheme;
   const navigationTheme = {
     ...base,
@@ -30,11 +35,22 @@ function ThemedApp() {
   return (
     <NavigationThemeProvider value={navigationTheme}>
       <View style={styles.container}>
-        <Stack screenOptions={{ headerShown: false }} />
         <View style={styles.topBar}>
+          {status === "authenticated" ? <UserMenu /> : null}
           <ThemeToggle />
           <I18nSelector />
         </View>
+
+        {isLoading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color={colors.primary} />
+          </View>
+        ) : status === "authenticated" ? (
+          <Stack screenOptions={{ headerShown: false }} />
+        ) : (
+          <LoginForm />
+        )}
+
         <StatusBar style={mode === "dark" ? "light" : "dark"} />
       </View>
     </NavigationThemeProvider>
@@ -45,9 +61,11 @@ export default function RootLayout() {
   return (
     <ThemeProvider>
       <I18nProvider>
-        <BooksProvider>
-          <ThemedApp />
-        </BooksProvider>
+        <AuthProvider>
+          <BooksProvider>
+            <ThemedApp />
+          </BooksProvider>
+        </AuthProvider>
       </I18nProvider>
     </ThemeProvider>
   );
@@ -57,12 +75,18 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  loadingContainer: {
+    alignItems: "center",
+    flex: 1,
+    justifyContent: "center",
+  },
   topBar: {
     alignItems: "center",
     flexDirection: "row",
+    gap: spacing.md,
     position: "absolute",
     right: spacing.md,
-    top: 0,
-    zIndex: 1,
+    top: spacing.md,
+    zIndex: 10,
   },
 });
