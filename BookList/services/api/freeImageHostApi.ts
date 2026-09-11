@@ -40,7 +40,9 @@ async function uploadToOpenHost(
     });
 
     if (!response.ok) return null;
-    const imageUrl = (await response.text()).trim();
+    const text =
+      typeof response.text === "function" ? await response.text() : "";
+    const imageUrl = text.trim();
     return imageUrl.startsWith("http") ? imageUrl : null;
   } catch {
     return null;

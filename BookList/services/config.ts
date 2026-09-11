@@ -19,6 +19,8 @@ export const API_CONFIG = {
 
 export const FREEIMAGEHOST_CONFIG = {
   uploadUrl: "https://freeimage.host/api/1/upload",
-  apiKey: process.env.EXPO_PUBLIC_FREEIMAGEHOST_API_KEY,
+  apiKey:
+    process.env.EXPO_PUBLIC_FREEIMAGEHOST_API_KEY ||
+    "6d207e02198a847aa98d0a2a901485a5",
   maxFileSizeBytes: 63 * 1024 * 1024, // 63 MB max file size limit
 };
