@@ -28,7 +28,7 @@ describe("Covers", () => {
     );
   });
 
-  it("pickCoverImage: resizes the picked image into a base64 data URI", async () => {
+  it("pickCoverImage: resizes the picked image and uploads it to a remote host", async () => {
     (
       ImagePicker.requestMediaLibraryPermissionsAsync as jest.Mock
     ).mockResolvedValue({ granted: true });
@@ -39,6 +39,11 @@ describe("Covers", () => {
     (ImageManipulator.manipulateAsync as jest.Mock).mockResolvedValue({
       base64: "AAAA",
     });
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({}),
+      text: async () => "https://files.catbox.moe/cover.jpg",
+    } as unknown as Response);
 
     const result = await pickCoverImage();
 
@@ -47,6 +52,6 @@ describe("Covers", () => {
       [{ resize: { width: 480 } }],
       expect.objectContaining({ compress: 0.6, base64: true }),
     );
-    expect(result).toBe("data:image/jpeg;base64,AAAA");
+    expect(result).toBe("https://files.catbox.moe/cover.jpg");
   });
 });
