@@ -2,17 +2,21 @@ import React from "react";
 import { TouchableOpacity, Text, StyleSheet } from "react-native";
 import { spacing, typography } from "../theme/tokens";
 import { useTheme } from "../features/theme/ThemeProvider";
+import { useI18n } from "../features/i18n/I18nProvider";
 
 export default function SaveButton({
   onPress,
   disabled,
-  label = "Sauvegarder",
+  label,
 }: {
   onPress: () => void;
   disabled?: boolean;
   label?: string;
 }) {
   const { colors } = useTheme();
+  const { t } = useI18n();
+  const buttonLabel = label ?? t("form.save");
+
   return (
     <TouchableOpacity
       style={[
@@ -23,10 +27,10 @@ export default function SaveButton({
       onPress={onPress}
       disabled={disabled}
       accessibilityRole="button"
-      accessibilityLabel={label}
+      accessibilityLabel={buttonLabel}
     >
       <Text style={[styles.text, { color: colors.textOnPrimary }]}>
-        {label}
+        {buttonLabel}
       </Text>
     </TouchableOpacity>
   );

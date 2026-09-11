@@ -1,5 +1,6 @@
 import React from "react";
 import { Pressable, StyleSheet, View } from "react-native";
+import { ROLES } from "../../domain/auth";
 import { useAuth } from "../../features/auth/AuthProvider";
 import { useI18n } from "../../features/i18n/I18nProvider";
 import { useTheme } from "../../features/theme/ThemeProvider";
@@ -13,6 +14,8 @@ export default function UserMenu() {
 
   if (!user) return null;
 
+  const isEditor = user.role === ROLES.EDITOR;
+
   return (
     <View style={styles.container}>
       <View style={styles.userInfo}>
@@ -23,10 +26,9 @@ export default function UserMenu() {
           style={[
             styles.roleBadge,
             {
-              backgroundColor:
-                user.role === "editeur"
-                  ? colors.primary + "33"
-                  : colors.textMuted + "33",
+              backgroundColor: isEditor
+                ? colors.primary + "33"
+                : colors.textMuted + "33",
             },
           ]}
         >
@@ -34,8 +36,7 @@ export default function UserMenu() {
             style={[
               styles.roleText,
               {
-                color:
-                  user.role === "editeur" ? colors.primary : colors.textMuted,
+                color: isEditor ? colors.primary : colors.textMuted,
               },
             ]}
           >

@@ -1,13 +1,6 @@
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import { Book, BookFilters, PaginatedBooks } from "../../domain/book";
-import { AppError, isAppError } from "../../domain/error";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { Book, PaginatedBooks } from "../../domain/book";
+import { AppError } from "../../domain/error";
 import { authService } from "../../services/auth/authService";
 import { booksList } from "./booksList";
 import {
@@ -18,43 +11,19 @@ import {
   upsertCachedBook,
 } from "./booksCache";
 import { toggleBookFavori } from "./bookFlagToggle";
+import {
+  BookListFilters,
+  BooksContext,
+  DEFAULT_LIMIT,
+  toAppError,
+} from "./booksContext";
 
-export type BookListFilters = Pick<
-  BookFilters,
-  "q" | "status" | "favori" | "sort" | "order"
->;
-
-const toAppError = (err: unknown): AppError =>
-  isAppError(err)
-    ? err
-    : { type: "NETWORK", message: "Unexpected error", cause: err };
-
-export interface BooksContextValue {
-  books: Book[];
-  page: number;
-  totalPages: number;
-  total: number;
-  hasMore: boolean;
-  loading: boolean;
-  loadingMore: boolean;
-  refreshing: boolean;
-  error: AppError | null;
-  scrollOffset: number;
-  filters: BookListFilters;
-  setFilters: (patch: Partial<BookListFilters>) => void;
-  fetchNextPage: () => Promise<void>;
-  refresh: () => Promise<void>;
-  setScrollOffset: (offset: number) => void;
-  addBookToList: (newBook: Book) => void;
-  updateBookInList: (updatedBook: Book) => void;
-  toggleFavorite: (id: string) => void;
-}
-
-const DEFAULT_LIMIT = 20;
-
-export const BooksContext = createContext<BooksContextValue | undefined>(
-  undefined,
-);
+export {
+  BookListFilters,
+  BooksContext,
+  BooksContextValue,
+  useBooksContext,
+} from "./booksContext";
 
 export function BooksProvider({ children }: { children: React.ReactNode }) {
   const [books, setBooks] = useState<Book[]>([]);
@@ -66,11 +35,10 @@ export function BooksProvider({ children }: { children: React.ReactNode }) {
   const [loadingMore, setLoadingMore] = useState<boolean>(false);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [error, setError] = useState<AppError | null>(null);
-  const [scrollOffset, setScrollOffsetState] = useState<number>(0);
+  const [scrollOffset, setScrollOffset] = useState<number>(0);
   const [filters, setFiltersState] = useState<BookListFilters>({});
 
   const filtersRef = useRef<BookListFilters>({});
-  const abortRef = useRef<AbortController | null>(null);
   const pageRef = useRef(page);
   const hasMoreRef = useRef(hasMore);
   const loadingRef = useRef(loading);
@@ -83,14 +51,11 @@ export function BooksProvider({ children }: { children: React.ReactNode }) {
     loadingRef.current = loading;
     loadingMoreRef.current = loadingMore;
     refreshingRef.current = refreshing;
-  }, [page, hasMore, loading, loadingMore, refreshing]);
-
-  const setScrollOffset = useCallback((offset: number) => {
-    setScrollOffsetState(offset);
-  }, []);
+    filtersRef.current = filters;
+  }, [page, hasMore, loading, loadingMore, refreshing, filters]);
 
   const setFilters = useCallback((patch: Partial<BookListFilters>) => {
-    setScrollOffsetState(0);
+    setScrollOffset(0);
     setLoading(true);
     setError(null);
     setFiltersState((prev) => ({ ...prev, ...patch }));
@@ -125,6 +90,7 @@ export function BooksProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let ignore = false;
+    const controller = new AbortController();
 
     const loadBooks = async () => {
       if (authService.getStatus() !== "authenticated") {
@@ -134,42 +100,45 @@ export function BooksProvider({ children }: { children: React.ReactNode }) {
       setLoading(true);
       setError(null);
       try {
-        const response = await booksList.getBooks({
-          page: 1,
-          limit: DEFAULT_LIMIT,
-        });
-        if (ignore) return;
-        replaceCachedBooks(response.items);
-        setBooks(response.items);
-        setPage(response.page);
-        setTotalPages(response.totalPages);
-        setTotal(response.total);
-        setHasMore(response.page < response.totalPages);
-      } catch (err) {
-        if (ignore) return;
-        setError(
-          isAppError(err)
-            ? err
-            : { type: "NETWORK", message: "Unexpected error", cause: err },
+        const response = await booksList.getBooks(
+          {
+            page: 1,
+            limit: DEFAULT_LIMIT,
+            ...filters,
+          },
+          controller.signal,
         );
+        if (ignore) return;
+        applyPage(response, false);
+      } catch (err) {
+        if (ignore || controller.signal.aborted) return;
+        setError(toAppError(err));
       } finally {
-        if (!ignore) setLoading(false);
+        if (!ignore && !controller.signal.aborted) {
+          setLoading(false);
+        }
       }
     };
-
-    const unsubscribe = authService.subscribe((status) => {
-      if (status === "authenticated") {
-        void loadBooks();
-      } else if (status === "unauthenticated") {
-        setBooks([]);
-        replaceCachedBooks([]);
-      }
-    });
 
     void loadBooks();
 
     return () => {
       ignore = true;
+      controller.abort();
+    };
+  }, [filters, applyPage]);
+
+  useEffect(() => {
+    const unsubscribe = authService.subscribe((status) => {
+      if (status === "unauthenticated") {
+        setBooks([]);
+        replaceCachedBooks([]);
+      } else if (status === "authenticated") {
+        setFiltersState((prev) => ({ ...prev }));
+      }
+    });
+
+    return () => {
       unsubscribe();
     };
   }, []);
@@ -203,9 +172,7 @@ export function BooksProvider({ children }: { children: React.ReactNode }) {
   }, [applyPage]);
 
   const refresh = useCallback(async () => {
-    if (refreshingRef.current) {
-      return;
-    }
+    if (refreshingRef.current) return;
     refreshingRef.current = true;
     setRefreshing(true);
     setError(null);
@@ -269,12 +236,4 @@ export function BooksProvider({ children }: { children: React.ReactNode }) {
       {children}
     </BooksContext.Provider>
   );
-}
-
-export function useBooksContext() {
-  const context = useContext(BooksContext);
-  if (!context) {
-    throw new Error("useBooksContext must be used within a BooksProvider");
-  }
-  return context;
 }

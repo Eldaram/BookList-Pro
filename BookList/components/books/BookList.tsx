@@ -16,11 +16,10 @@ import { spacing, typography } from "../../theme/tokens";
 import { useBooks } from "../../hooks/useBooks";
 import { useI18n } from "../../features/i18n/I18nProvider";
 import { useTheme } from "../../features/theme/ThemeProvider";
+import { CELL_TARGET_WIDTH } from "./BookCardShell";
 import BookCell from "./BookCell";
 import BookListLoading from "./BookListLoading";
 import AddButton from "../AddButton";
-
-const CELL_TARGET_WIDTH = 160;
 
 export default function BookList() {
   const router = useRouter();
@@ -87,19 +86,10 @@ export default function BookList() {
 
   const handleScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     if (isRestoringScrollRef.current) return;
-    const { contentOffset, layoutMeasurement, contentSize } = e.nativeEvent;
-    const yOffset = contentOffset.y;
+    const yOffset = e.nativeEvent.contentOffset.y;
 
     if (yOffset >= 0) {
       setScrollOffset(yOffset);
-    }
-
-    if (contentSize.height > 0 && layoutMeasurement.height > 0) {
-      const distanceFromBottom =
-        contentSize.height - (layoutMeasurement.height + yOffset);
-      if (distanceFromBottom < 400) {
-        fetchNextPage();
-      }
     }
   };
 

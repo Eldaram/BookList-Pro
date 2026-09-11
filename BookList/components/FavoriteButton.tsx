@@ -20,7 +20,6 @@ export default function FavoriteButton({
   const label = favori ? t("books.favorite.remove") : t("books.favorite.add");
 
   const handlePress = (event: GestureResponderEvent) => {
-    // Empeche la bascule de declencher la navigation de la carte parente.
     event.stopPropagation();
     onPress();
   };

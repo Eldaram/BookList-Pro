@@ -7,6 +7,7 @@ import {
   View,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
+import { BookSortField } from "../../domain/book";
 import { BookListFilters } from "../../features/books/BooksProvider";
 import { useDebouncedValue } from "../../hooks/useDebouncedValue";
 import { useI18n } from "../../features/i18n/I18nProvider";
@@ -52,7 +53,7 @@ function Chip({
   );
 }
 
-const SORTS = ["titre", "auteur", "annee", "note"] as const;
+const SORTS: readonly BookSortField[] = ["titre", "auteur", "annee", "note"];
 
 export default function BookToolbar({ filters, onChange }: Props) {
   const { colors } = useTheme();
@@ -64,14 +65,13 @@ export default function BookToolbar({ filters, onChange }: Props) {
     const next = debouncedQuery.trim();
     if (next === (filters.q ?? "")) return;
     onChange({ q: next || undefined });
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- seul le texte anti-rebondi declenche la recherche
-  }, [debouncedQuery]);
+  }, [debouncedQuery, filters.q, onChange]);
 
   const toggleStatus = (status: "lu" | "nonlu") =>
     onChange({ status: filters.status === status ? undefined : status });
 
   const cycleSort = () => {
-    const index = SORTS.indexOf(filters.sort as (typeof SORTS)[number]);
+    const index = filters.sort ? SORTS.indexOf(filters.sort) : -1;
     onChange({ sort: SORTS[(index + 1) % SORTS.length] });
   };
 

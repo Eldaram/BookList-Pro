@@ -1,6 +1,9 @@
 import * as ImagePicker from "expo-image-picker";
 import * as ImageManipulator from "expo-image-manipulator";
 import { API_CONFIG, FREEIMAGEHOST_CONFIG } from "../config";
+import { uploadCoverToFreeImageHost } from "../api/freeImageHostApi";
+
+export { uploadCoverToFreeImageHost } from "../api/freeImageHostApi";
 
 const MAX_WIDTH = 480;
 const JPEG_COMPRESS = 0.6;
@@ -24,102 +27,23 @@ export function validateCoverFileSize(fileSizeInBytes?: number | null): void {
 }
 
 /**
- * Uploads a base64 encoded image to a remote image host and returns the hosted image URL (~35 chars).
- */
-export async function uploadCoverToFreeImageHost(
-  base64Image: string,
-): Promise<string> {
-  const cleanBase64 = base64Image.replace(/^data:image\/\w+;base64,/, "");
-
-  // Attempt FreeImageHost if a valid API key is present
-  const apiKey = FREEIMAGEHOST_CONFIG.apiKey;
-  if (apiKey) {
-    try {
-      const formData = new FormData();
-      formData.append("key", apiKey);
-      formData.append("action", "upload");
-      formData.append("source", cleanBase64);
-      formData.append("format", "json");
-
-      const isWeb =
-        typeof window !== "undefined" && typeof window.document !== "undefined";
-      const uploadUrl = isWeb
-        ? `https://corsproxy.io/?${encodeURIComponent(
-            FREEIMAGEHOST_CONFIG.uploadUrl,
-          )}`
-        : FREEIMAGEHOST_CONFIG.uploadUrl;
-
-      const response = await fetch(uploadUrl, {
-        method: "POST",
-        body: formData,
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        const imageUrl =
-          data?.image?.url || data?.image?.display_url || data?.url;
-        if (imageUrl) return imageUrl;
-      }
-    } catch {
-      // Continue to reliable open upload host
-    }
-  }
-
-  // Open CORS image host upload (returns direct HTTPS URL ~36 chars)
-  const byteCharacters = atob(cleanBase64);
-  const byteNumbers = new Array(byteCharacters.length);
-  for (let i = 0; i < byteCharacters.length; i++) {
-    byteNumbers[i] = byteCharacters.charCodeAt(i);
-  }
-  const byteArray = new Uint8Array(byteNumbers);
-  const blob = new Blob([byteArray], { type: "image/jpeg" });
-
-  const formData = new FormData();
-  formData.append("reqtype", "fileupload");
-  formData.append("time", "72h");
-  formData.append("fileToUpload", blob, "cover.jpg");
-
-  const response = await fetch(
-    "https://litterbox.catbox.moe/resources/internals/api.php",
-    {
-      method: "POST",
-      body: formData,
-    },
-  );
-
-  if (!response.ok) {
-    throw new Error(
-      `Remote image upload failed with status ${response.status}`,
-    );
-  }
-
-  const imageUrl = (await response.text()).trim();
-  if (!imageUrl.startsWith("http")) {
-    throw new Error("Remote image upload did not return a valid URL.");
-  }
-
-  return imageUrl;
-}
-
-/**
- * Seule fonction du domaine chargee de resoudre l'URL affichable d'une
- * couverture : chemin relatif prefixe par l'URL de base, URL absolue laissee
- * intacte, valeur vide -> null (le composant affiche alors un repli local,
- * l'API livree ne servant pas de route /covers/:id.svg).
+ * Resolves the displayable URL for a book cover:
+ * prefixes relative paths with base API URL, leaves absolute URLs intact,
+ * returns null when empty.
  */
 export function resolveCoverUri(
   couverture: string | null | undefined,
 ): string | null {
   const value = couverture?.trim();
   if (!value) return null;
-  // Chemin relatif servi par l'API (/media/...).
   if (value.startsWith("/")) return `${API_CONFIG.baseUrl}${value}`;
   return value;
 }
 
 /**
- * Ouvre le selecteur d'images, valide la taille (<= 63MB), redimensionne puis
- * televerse sur FreeImageHost pour obtenir une URL distante.
+ * Opens image picker, validates file size (<= 63MB), resizes and compresses image,
+ * then uploads to remote image host.
+ * Degrades gracefully to null if remote upload is unavailable.
  */
 export async function pickCoverImage(): Promise<string | null> {
   const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -133,7 +57,7 @@ export async function pickCoverImage(): Promise<string | null> {
 
   const asset = result.assets[0];
 
-  // Validation taille de fichier (max 63 MB)
+  // File size validation (max 63 MB)
   validateCoverFileSize(asset.fileSize);
 
   const manipulated = await ImageManipulator.manipulateAsync(
@@ -149,15 +73,5 @@ export async function pickCoverImage(): Promise<string | null> {
 
   const base64Uri = `data:image/jpeg;base64,${manipulated.base64}`;
 
-  try {
-    const remoteUrl = await uploadCoverToFreeImageHost(base64Uri);
-    return remoteUrl;
-  } catch (err) {
-    console.error("FreeImageHost upload error:", err);
-    throw new Error(
-      err instanceof Error
-        ? err.message
-        : "Failed to upload cover image to remote host.",
-    );
-  }
+  return await uploadCoverToFreeImageHost(base64Uri);
 }

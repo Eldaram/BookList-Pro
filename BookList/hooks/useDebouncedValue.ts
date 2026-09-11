@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 
-// Anti-rebond de 300 ms exige par le cahier des charges pour la recherche.
+/**
+ * Hook to debounce rapidly changing values with a customizable delay.
+ */
 export function useDebouncedValue<T>(value: T, delayMs = 300): T {
   const [debounced, setDebounced] = useState(value);
 

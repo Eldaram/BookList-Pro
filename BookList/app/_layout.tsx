@@ -6,7 +6,12 @@ import {
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
+import {
+  SafeAreaProvider,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
+import ErrorBoundary from "../components/ErrorBoundary";
 import LoginForm from "../components/auth/LoginForm";
 import UserMenu from "../components/auth/UserMenu";
 import I18nSelector from "../components/i18n/i18n";
@@ -20,6 +25,7 @@ import { spacing } from "../theme/tokens";
 function ThemedApp() {
   const { mode, colors } = useTheme();
   const { status, isLoading } = useAuth();
+  const insets = useSafeAreaInsets();
 
   const base = mode === "dark" ? DarkTheme : DefaultTheme;
   const navigationTheme = {
@@ -35,7 +41,7 @@ function ThemedApp() {
   return (
     <NavigationThemeProvider value={navigationTheme}>
       <View style={styles.container}>
-        <View style={styles.topBar}>
+        <View style={[styles.topBar, { top: insets.top + spacing.md }]}>
           {status === "authenticated" ? <UserMenu /> : null}
           <ThemeToggle />
           <I18nSelector />
@@ -59,15 +65,19 @@ function ThemedApp() {
 
 export default function RootLayout() {
   return (
-    <ThemeProvider>
-      <I18nProvider>
-        <AuthProvider>
-          <BooksProvider>
-            <ThemedApp />
-          </BooksProvider>
-        </AuthProvider>
-      </I18nProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <SafeAreaProvider>
+        <ThemeProvider>
+          <I18nProvider>
+            <AuthProvider>
+              <BooksProvider>
+                <ThemedApp />
+              </BooksProvider>
+            </AuthProvider>
+          </I18nProvider>
+        </ThemeProvider>
+      </SafeAreaProvider>
+    </ErrorBoundary>
   );
 }
 
@@ -86,7 +96,6 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     position: "absolute",
     right: spacing.md,
-    top: spacing.md,
     zIndex: 10,
   },
 });

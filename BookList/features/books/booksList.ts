@@ -3,35 +3,18 @@ import { noteServiceImpl } from "../../services/servicesImpl/noteServiceImpl";
 import { BookFilters, BookInput } from "../../domain/book";
 
 export const booksList = {
-  getBooks: async (filters?: BookFilters, signal?: AbortSignal) => {
-    return await bookServiceImpl.getBooks(filters, signal);
-  },
-  getBookById: async (id: string) => {
-    return await bookServiceImpl.getBookById(id);
-  },
-  createBook: async (input: BookInput) => {
-    return await bookServiceImpl.createBook(input);
-  },
-  updateBook: async (
-    id: string,
-    input: BookInput,
-    expectedVersion?: number,
-  ) => {
-    return await bookServiceImpl.updateBook(id, input, expectedVersion);
-  },
-  deleteBook: async (id: string) => {
-    return await bookServiceImpl.deleteBook(id);
-  },
-  patchBook: async (id: string, patch: Partial<BookInput>) => {
-    return await bookServiceImpl.patchBook(id, patch);
-  },
-  getNotes: async (bookId: string) => {
-    return await noteServiceImpl.getNotes(bookId);
-  },
-  createNote: async (bookId: string, contenu: string) => {
-    return await noteServiceImpl.createNote(bookId, contenu);
-  },
-  deleteNote: async (bookId: string, noteId: string) => {
-    return await noteServiceImpl.deleteNote(bookId, noteId);
-  },
+  getBooks: (filters?: BookFilters, signal?: AbortSignal) =>
+    bookServiceImpl.getBooks(filters, signal),
+  getBookById: (id: string) => bookServiceImpl.getBookById(id),
+  createBook: (input: BookInput) => bookServiceImpl.createBook(input),
+  updateBook: (id: string, input: BookInput, expectedVersion?: number) =>
+    bookServiceImpl.updateBook(id, input, expectedVersion),
+  deleteBook: (id: string) => bookServiceImpl.deleteBook(id),
+  patchBook: (id: string, patch: Partial<BookInput>) =>
+    bookServiceImpl.patchBook(id, patch),
+  getNotes: (bookId: string) => noteServiceImpl.getNotes(bookId),
+  createNote: (bookId: string, contenu: string) =>
+    noteServiceImpl.createNote(bookId, contenu),
+  deleteNote: (bookId: string, noteId: string) =>
+    noteServiceImpl.deleteNote(bookId, noteId),
 };

@@ -2,20 +2,22 @@ import { z } from "zod";
 import { API_CONFIG } from "../config";
 import { authService } from "../auth/authService";
 import {
-  AppError,
   AuthError,
-  AuthReason,
-  ConflictError,
   NetworkError,
   ServerError,
   ValidationError,
 } from "../../domain/error";
+import {
+  handleHttpStatusError,
+  isAppError,
+  mapApiAuthReason,
+} from "./httpClientHelpers";
 
 export type RequestOptions<T> = {
   method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   headers?: Record<string, string>;
   body?: unknown;
-  schema?: z.ZodSchema<T>;
+  schema?: z.ZodType<T>;
   skipAuth?: boolean;
   skipAutoRefresh?: boolean;
   timeoutMs?: number;
@@ -24,31 +26,6 @@ export type RequestOptions<T> = {
 
 async function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-function mapApiAuthReason(serverReason?: unknown): AuthReason {
-  if (typeof serverReason !== "string") return "token_invalid";
-  switch (serverReason) {
-    case "jeton_absent":
-      return "token_missing";
-    case "jeton_expire":
-      return "token_expired";
-    case "jeton_invalide":
-      return "token_invalid";
-    case "droits_insuffisants":
-      return "insufficient_permissions";
-    default:
-      return "token_invalid";
-  }
-}
-
-function isAppError(err: unknown): err is AppError {
-  if (typeof err !== "object" || err === null) return false;
-  const type = (err as { type?: string }).type;
-  return (
-    typeof type === "string" &&
-    ["AUTH", "VALIDATION", "CONFLICT", "SERVER", "NETWORK"].includes(type)
-  );
 }
 
 class HttpClient {
@@ -91,7 +68,7 @@ class HttpClient {
       try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
-        // Relie l'annulation externe (recherche remplacee) au controleur interne.
+
         if (signal?.aborted) controller.abort();
         else
           signal?.addEventListener("abort", () => controller.abort(), {
@@ -107,7 +84,6 @@ class HttpClient {
 
         clearTimeout(timeoutId);
 
-        // Handle successful response (200-299)
         if (response.ok) {
           if (response.status === 204) {
             return undefined as T;
@@ -127,7 +103,6 @@ class HttpClient {
           return json as T;
         }
 
-        // Handle error status responses
         let errorData: Record<string, unknown> = {};
         try {
           errorData = (await response.json()) as Record<string, unknown>;
@@ -139,11 +114,8 @@ class HttpClient {
         const errorMessage =
           typeof errorData.message === "string" ? errorData.message : undefined;
 
-        // 401 Unauthorized
         if (status === 401) {
           const rawError = errorData.erreur;
-
-          // Attempt transparent token refresh or re-authentication
           if (
             (rawError === "jeton_expire" || rawError === "jeton_absent") &&
             !skipAutoRefresh
@@ -155,7 +127,6 @@ class HttpClient {
                   : await authService.ensureAuthenticated();
               requestHeaders["Authorization"] = `Bearer ${newToken}`;
 
-              // Retry original request with new token
               const retryResponse = await fetch(fullUrl, {
                 method,
                 headers: requestHeaders,
@@ -183,69 +154,18 @@ class HttpClient {
           } satisfies AuthError;
         }
 
-        // 403 Forbidden
-        if (status === 403) {
-          throw {
-            type: "AUTH",
-            reason: "insufficient_permissions",
-            message:
-              errorMessage || "Insufficient permissions for this action.",
-          } satisfies AuthError;
+        if (status === 503 && attempts < maxAttempts) {
+          const backoffMs = 300 * Math.pow(2, attempts - 1);
+          await sleep(backoffMs);
+          continue;
         }
 
-        // 409 Conflict (ETag / version mismatch)
-        if (status === 409) {
-          throw {
-            type: "CONFLICT",
-            message: errorMessage || "Version conflict detected.",
-            serverState: errorData.serveur,
-            expectedVersion:
-              typeof errorData.versionAttendue === "number"
-                ? errorData.versionAttendue
-                : undefined,
-          } satisfies ConflictError;
-        }
-
-        // 422 Validation Error
-        if (status === 422) {
-          const fields =
-            typeof errorData.champs === "object" && errorData.champs !== null
-              ? (errorData.champs as Record<string, string>)
-              : {};
-          throw {
-            type: "VALIDATION",
-            fields,
-            message: errorMessage || "Field validation error.",
-          } satisfies ValidationError;
-        }
-
-        // 503 Service Unavailable / Chaos Mode -> Retryable
-        if (status === 503) {
-          if (attempts < maxAttempts) {
-            const backoffMs = 300 * Math.pow(2, attempts - 1);
-            await sleep(backoffMs);
-            continue; // Retry loop
-          }
-          throw {
-            type: "SERVER",
-            httpCode: 503,
-            message: "Service temporarily unavailable.",
-          } satisfies ServerError;
-        }
-
-        // General Server Error
-        throw {
-          type: "SERVER",
-          httpCode: status,
-          message: errorMessage || `Server error (${status}).`,
-        } satisfies ServerError;
+        handleHttpStatusError(status, errorData);
       } catch (err: unknown) {
-        // Re-throw typed domain errors
         if (isAppError(err)) {
           throw err;
         }
 
-        // Annulation volontaire : ne pas reessayer.
         if (signal?.aborted) {
           throw {
             type: "NETWORK",
@@ -254,7 +174,6 @@ class HttpClient {
           } satisfies NetworkError;
         }
 
-        // Retry on network failures if attempts remain
         if (attempts < maxAttempts) {
           const backoffMs = 300 * Math.pow(2, attempts - 1);
           await sleep(backoffMs);

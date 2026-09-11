@@ -22,7 +22,6 @@ export default function ReadStatusToggle({
   const label = lu ? t("books.read.markUnread") : t("books.read.markRead");
 
   const handlePress = (event: GestureResponderEvent) => {
-    // Empeche la bascule de declencher la navigation de la carte parente.
     event.stopPropagation();
     onPress();
   };

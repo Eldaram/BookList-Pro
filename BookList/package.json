@@ -17,6 +17,7 @@
   "dependencies": {
     "@expo/metro-runtime": "~6.1.2",
     "@expo/vector-icons": "^15.0.3",
+    "@hookform/resolvers": "^5.9.1",
     "@react-native-picker/picker": "2.11.1",
     "eslint-config-expo": "~10.0.0",
     "expo": "~54.0.36",
@@ -27,7 +28,10 @@
     "expo-status-bar": "~3.0.9",
     "react": "19.1.0",
     "react-dom": "19.1.0",
+    "react-hook-form": "^7.87.0",
     "react-native": "0.81.5",
+    "react-native-safe-area-context": "^5.9.1",
+    "react-native-screens": "^4.27.0",
     "react-native-web": "^0.21.0",
     "zod": "^4.5.4"
   },

@@ -1,6 +1,6 @@
 import { useCallback, useContext, useEffect, useState } from "react";
 import { Book } from "../domain/book";
-import { AppError, isAppError } from "../domain/error";
+import { AppError, toAppError } from "../domain/error";
 import {
   BooksContext,
   BooksContextValue,
@@ -13,7 +13,6 @@ import {
   subscribeBooksCache,
 } from "../features/books/booksCache";
 import { toggleBookFavori } from "../features/books/bookFlagToggle";
-//Ajoute la couverture des livres dans le hook useBooks
 
 export function useBooks(): BooksContextValue {
   const context = useContext(BooksContext);
@@ -23,7 +22,7 @@ export function useBooks(): BooksContextValue {
   const [localLoading, setLocalLoading] = useState(true);
   const [localError, setLocalError] = useState<AppError | null>(null);
 
-  // Le fallback passe par le cache pour que le toggle optimiste se propage
+  // Fallback syncs with the cache so optimistic toggles propagate
   useEffect(() => {
     if (context) return;
     return subscribeBooksCache(() => {
@@ -43,11 +42,7 @@ export function useBooks(): BooksContextValue {
         }
       } catch (err) {
         if (isMounted) {
-          setLocalError(
-            isAppError(err)
-              ? err
-              : { type: "NETWORK", message: "Unexpected error", cause: err },
-          );
+          setLocalError(toAppError(err));
         }
       } finally {
         if (isMounted) {

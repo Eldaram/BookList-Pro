@@ -5,11 +5,9 @@ import {
 } from "../services/api/openLibraryApi";
 import { useDebouncedValue } from "./useDebouncedValue";
 
-// Enrichissement OpenLibrary d'une fiche : jamais d'etat erreur,
-// l'indisponibilite se traduit par enrichment=null (degradation silencieuse).
 export function useOpenLibrary(titre: string | undefined) {
-  // Resultat memorise avec son titre : l'enrichissement est derive au rendu,
-  // un titre vide ou change n'affiche donc jamais le resultat precedent.
+  // Memorized result with its title: enrichment is derived on render,
+  // so an empty or changing title never displays a stale result.
   const [lastResult, setLastResult] = useState<{
     titre: string;
     enrichment: OpenLibraryEnrichment | null;
@@ -19,17 +17,25 @@ export function useOpenLibrary(titre: string | undefined) {
 
   useEffect(() => {
     if (!debouncedTitre) return;
+
     let cancelled = false;
-    setLoading(true);
-    searchByTitle(debouncedTitre)
-      .then((result) => {
+
+    const fetchEnrichment = async () => {
+      setLoading(true);
+      try {
+        const result = await searchByTitle(debouncedTitre);
         if (!cancelled) {
           setLastResult({ titre: debouncedTitre, enrichment: result });
         }
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    void fetchEnrichment();
+
     return () => {
       cancelled = true;
     };
