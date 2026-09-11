@@ -4,7 +4,23 @@ Application React Native destinee aux libraires des Comptoirs du Livre. La cible
 
 ## Etat du projet
 
-Le squelette Expo Router est en place. L'ecran d'accueil est `app/(tabs)/index.tsx` et affiche une page temporaire. Les cas d'usage du lot 1 seront ajoutes progressivement : liste paginee, fiche, creation, modification et suppression des livres.
+Lots 1 a 3 livres (cahier de lecture, notes et coups de coeur, fiche enrichie), lot 4 entame (connexion et session). Le detail par lot figure dans le resume ci-dessous.
+
+## Resume des travaux autour de la presentation du 11/09 a 14h20
+
+### Avant la presentation (gel du perimetre fonctionnel)
+
+- **Lot 1** : liste paginee du fonds avec defilement infini, fiche detaillee, creation, modification, suppression avec confirmation et annulation pendant cinq secondes, statut lu / non lu.
+- **Lot 2** : notes de lecture (ajout, suppression, horodatage), coups de coeur avec mise a jour optimiste, recherche et filtres cote serveur avec anti-rebond, cellules memoisees (aucun rendu superflu).
+- **Lot 3** : note par etoiles, couvertures (image locale, URL externe, repli aux initiales du titre), remplacement de couverture avec redimensionnement, enrichissement OpenLibrary (nombre d'editions, couverture de secours) avec cache persistant, espacement des requetes, deduplication et degradation silencieuse, theme clair/sombre, interface bilingue FR/EN.
+- **Lot 4 (entame)** : ecran de connexion, deconnexion, session persistee.
+- **Livrables** : ADR 001 a 003, `docs/PERFORMANCE.md` avec mesures avant/apres, tests unitaires et d'integration reorganises (`unit/` par couche, `integration/`), video de demonstration du cache OpenLibrary, `IA.md`.
+
+### Apres la presentation (aucune fonctionnalite nouvelle)
+
+- Revue de code globale du depot et traitement des remarques (PR #44).
+- Stabilisation de la CI (gestion de la cle FreeImageHost, durcissement de l'envoi de couverture).
+- Centralisation de la configuration OpenLibrary (URLs, timeout, espacement, TTL) dans `services/config.ts` : plus aucune URL en dur dans les modules.
 
 ## Prerequis
 
