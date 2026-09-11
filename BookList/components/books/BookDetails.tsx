@@ -91,7 +91,11 @@ export default function BookDetails({
           />
         </View>
         <View style={styles.coverWrapper}>
-          <BookCover uri={book.couverture} fallbackUri={enrichment?.coverUrl} />
+          <BookCover
+            uri={book.couverture}
+            fallbackUri={enrichment?.coverUrl}
+            title={book.titre}
+          />
         </View>
         <View style={styles.info}>
           <View style={styles.titleRow}>

@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { useRouter } from "expo-router";
 import { Book, BookInput } from "../../domain/book";
 import { AppError, isAppError } from "../../domain/error";
 import { booksList } from "../../features/books/booksList";
 import { useBooksContext } from "../../features/books/BooksProvider";
 import { useI18n } from "../../features/i18n/I18nProvider";
+import { useOpenLibrary } from "../../hooks/useOpenLibrary";
 import { useTheme } from "../../features/theme/ThemeProvider";
 import { pickCoverImage } from "../../services/servicesImpl/coverServiceImpl";
 import { spacing, typography } from "../../theme/tokens";
@@ -52,6 +53,9 @@ export default function BookForm({ mode, book }: Props) {
       annee: book ? String(book.annee) : "",
     },
   });
+
+  const watchedTitre = useWatch({ control, name: "titre" });
+  const { enrichment } = useOpenLibrary(couverture ? undefined : watchedTitre);
 
   const addCover = async () => {
     setCoverError(null);
@@ -130,6 +134,8 @@ export default function BookForm({ mode, book }: Props) {
         <BookFormCoverSection
           coverError={coverError}
           coverUri={couverture}
+          fallbackUri={enrichment?.coverUrl}
+          title={watchedTitre}
           onAddCover={() => void addCover()}
           onResetCover={resetCover}
         />

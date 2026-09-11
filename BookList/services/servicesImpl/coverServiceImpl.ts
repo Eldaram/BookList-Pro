@@ -1,6 +1,6 @@
 import * as ImagePicker from "expo-image-picker";
 import * as ImageManipulator from "expo-image-manipulator";
-import { FREEIMAGEHOST_CONFIG } from "../config";
+import { API_CONFIG, FREEIMAGEHOST_CONFIG } from "../config";
 import { uploadCoverToFreeImageHost } from "../api/freeImageHostApi";
 
 export { uploadCoverToFreeImageHost } from "../api/freeImageHostApi";
@@ -27,13 +27,17 @@ export function validateCoverFileSize(fileSizeInBytes?: number | null): void {
 }
 
 /**
- * Resolves the displayable URL for a book cover (remote URL, data URI, or null if absent).
+ * Resolves the displayable URL for a book cover:
+ * prefixes relative paths with base API URL, leaves absolute URLs intact,
+ * returns null when empty.
  */
 export function resolveCoverUri(
   couverture: string | null | undefined,
 ): string | null {
-  if (!couverture || couverture.trim().length === 0) return null;
-  return couverture;
+  const value = couverture?.trim();
+  if (!value) return null;
+  if (value.startsWith("/")) return `${API_CONFIG.baseUrl}${value}`;
+  return value;
 }
 
 /**

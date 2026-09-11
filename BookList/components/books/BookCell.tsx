@@ -27,7 +27,11 @@ function BookCell({ book, numColumns, onOpen, onToggleFavorite }: Props) {
       onPress={() => onOpen(book.id)}
       accessibilityLabel={book.titre}
       cover={
-        <BookCover uri={book.couverture} fallbackUri={enrichment?.coverUrl} />
+        <BookCover
+          uri={book.couverture}
+          fallbackUri={enrichment?.coverUrl}
+          title={book.titre}
+        />
       }
       action={
         <FavoriteButton

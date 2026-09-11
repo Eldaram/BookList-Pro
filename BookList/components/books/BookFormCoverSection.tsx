@@ -8,6 +8,8 @@ import BookCover from "./BookCover";
 
 type Props = {
   coverUri: string | null;
+  fallbackUri?: string | null;
+  title?: string;
   coverError: string | null;
   onAddCover: () => void;
   onResetCover: () => void;
@@ -15,6 +17,8 @@ type Props = {
 
 export default function BookFormCoverSection({
   coverUri,
+  fallbackUri,
+  title,
   coverError,
   onAddCover,
   onResetCover,
@@ -24,7 +28,7 @@ export default function BookFormCoverSection({
 
   return (
     <View style={styles.coverWrapper}>
-      <BookCover uri={coverUri} />
+      <BookCover uri={coverUri} fallbackUri={fallbackUri} title={title} />
       <TouchableOpacity
         accessibilityLabel={t("form.cover.add")}
         accessibilityRole="button"

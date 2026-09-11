@@ -201,3 +201,66 @@ La langue (`BOOKLIST_LOCALE`) et le theme (`BOOKLIST_THEME_MODE`) sont persistes
 
 - Le nombre de langues ou les besoins de pluralisation imposent i18next.
 - La persistance des preferences utilisateur est introduite au lot 4.
+
+# ADR 003 - Couche de services applicatifs (`servicesImpl/`)
+
+## Statut
+
+Accepte - 11/09/2026
+
+## Contexte
+
+Depuis l'ADR 001, `features/` et `hooks/` appelaient directement les modules de `services/api/` (`booksApi`, `notesApi`). Chaque nouveau cas d'usage (notes de lecture, couvertures, bascule lu/favori) multipliait les points de contact directs avec la couche HTTP.
+
+Or le lot 4 imposera une file de mutations hors ligne, un cache persistant et une synchronisation idempotente : ces mecanismes doivent s'intercaler entre les cas d'usage et l'API **sans reecrire les hooks ni les composants**. Il manquait un point d'interception unique.
+
+Par ailleurs, certaines operations ne sont pas de simples appels HTTP : la selection d'une couverture combine permission, selecteur d'images, redimensionnement et encodage base64 — une orchestration qui n'a sa place ni dans un composant, ni dans `services/api/`.
+
+## Options envisagees
+
+1. Continuer d'appeler `booksApi` et `notesApi` directement depuis `features/` et `hooks/`. Simple, mais le lot 4 obligerait a modifier chaque hook pour brancher la file hors ligne, et l'orchestration des couvertures fuirait dans les composants.
+2. Grossir `services/api/` avec cette logique. La couche API perdrait sa responsabilite unique (HTTP + validation Zod) et deviendrait difficile a tester.
+3. Introduire une couche de services applicatifs `services/servicesImpl/` entre les cas d'usage et les API.
+
+## Decision
+
+Nous retenons l'option 3.
+
+```text
+services/
+  api/                        # HTTP pur : fetch, URL, validation Zod
+    booksApi.ts
+    notesApi.ts
+    openLibraryApi.ts
+  servicesImpl/               # services applicatifs : point de contact unique
+    bookServiceImpl.ts        # ServiceImpl des livres (CRUD, pagination, version)
+    noteServiceImpl.ts        # notes de lecture d'un livre
+    coverServiceImpl.ts       # resolution d'URI, selection + redimensionnement d'image
+```
+
+Regles :
+
+- `features/` et `hooks/` n'importent plus jamais `services/api/` directement : ils passent par `servicesImpl/`.
+- `servicesImpl/` est le seul consommateur de `services/api/` et ne depend que de `domain/` et `services/`.
+- Chaque service est une classe exportee en singleton (`bookServiceImpl`), ce qui donne un seuil de mock unique dans les tests.
+
+Aujourd'hui `bookServiceImpl` et `noteServiceImpl` sont de simples delegations vers l'API : c'est voulu. Leur valeur est le **point d'interception** qu'ils reservent : au lot 4, la file de mutations hors ligne, le cache persistant et la resolution de conflits s'implanteront dans ces services sans toucher aux hooks, aux features ni aux composants. `coverServiceImpl` montre deja le cas non trivial : il orchestre permission, selecteur, redimensionnement et encodage, invisible pour l'interface.
+
+## Consequences
+
+### Positives
+
+- Un seul endroit a modifier pour brancher le hors ligne, le cache ou la telemetrie au lot 4.
+- Les tests de `features/` et `hooks/` mockent un service, pas un module HTTP.
+- `services/api/` garde une responsabilite unique : HTTP et validation runtime.
+- L'orchestration multi-etapes (couvertures) a un proprietaire clair.
+
+### Negatives
+
+- Une indirection supplementaire : les delegations pures ajoutent des fichiers quasi vides tant que le lot 4 n'est pas la.
+- Discipline d'import a respecter (aucun outil ne l'impose pour l'instant).
+
+### A revoir si
+
+- Le lot 4 revele qu'une interface explicite (`BookService`) est necessaire pour permuter implementation en ligne et hors ligne.
+- Les delegations restent vides apres le lot 4 : la couche devrait alors etre re-evaluee.

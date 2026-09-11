@@ -6,9 +6,12 @@ import {
 import { useDebouncedValue } from "./useDebouncedValue";
 
 export function useOpenLibrary(titre: string | undefined) {
-  const [enrichment, setEnrichment] = useState<OpenLibraryEnrichment | null>(
-    null,
-  );
+  // Memorized result with its title: enrichment is derived on render,
+  // so an empty or changing title never displays a stale result.
+  const [lastResult, setLastResult] = useState<{
+    titre: string;
+    enrichment: OpenLibraryEnrichment | null;
+  } | null>(null);
   const [loading, setLoading] = useState(false);
   const debouncedTitre = useDebouncedValue(titre);
 
@@ -22,7 +25,7 @@ export function useOpenLibrary(titre: string | undefined) {
       try {
         const result = await searchByTitle(debouncedTitre);
         if (!cancelled) {
-          setEnrichment(result);
+          setLastResult({ titre: debouncedTitre, enrichment: result });
         }
       } finally {
         if (!cancelled) {
@@ -38,8 +41,10 @@ export function useOpenLibrary(titre: string | undefined) {
     };
   }, [debouncedTitre]);
 
-  return {
-    enrichment: debouncedTitre ? enrichment : null,
-    loading: debouncedTitre ? loading : false,
-  };
+  const enrichment =
+    lastResult && lastResult.titre === debouncedTitre
+      ? lastResult.enrichment
+      : null;
+
+  return { enrichment, loading };
 }
