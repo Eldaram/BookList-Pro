@@ -3,6 +3,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { Book } from "../../domain/book";
 import { spacing, typography } from "../../theme/tokens";
 import { useTheme } from "../../features/theme/ThemeProvider";
+import { useOpenLibrary } from "../../hooks/useOpenLibrary";
 import BookCover from "./BookCover";
 import FavoriteButton from "../FavoriteButton";
 
@@ -19,36 +20,42 @@ type Props = {
 // cellule ne re-rende pas toute la grille (exigence "aucun rendu superflu").
 function BookCell({ book, numColumns, onOpen, onToggleFavorite }: Props) {
   const { colors } = useTheme();
+  // Fallback OpenLibrary uniquement si le livre n'a pas de couverture locale.
+  const { enrichment } = useOpenLibrary(
+    book.couverture ? undefined : book.titre,
+  );
 
+  // FavoriteButton hors du Pressable : un <button> HTML ne peut pas en contenir un autre.
   return (
-    <Pressable
-      style={[styles.cell, { flex: 1 / numColumns }]}
-      onPress={() => onOpen(book.id)}
-      accessibilityRole="button"
-      accessibilityLabel={book.titre}
-    >
-      <View style={styles.coverWrapper}>
-        <BookCover uri={book.couverture} />
-        <View style={styles.favoriteOverlay}>
-          <FavoriteButton
-            favori={book.favori}
-            onPress={() => onToggleFavorite(book.id)}
-          />
+    <View style={[styles.cell, { flex: 1 / numColumns }]}>
+      <Pressable
+        onPress={() => onOpen(book.id)}
+        accessibilityRole="button"
+        accessibilityLabel={book.titre}
+      >
+        <View style={styles.coverWrapper}>
+          <BookCover uri={book.couverture} fallbackUri={enrichment?.coverUrl} />
         </View>
+        <Text
+          style={[styles.bookTitle, { color: colors.text }]}
+          numberOfLines={2}
+        >
+          {book.titre}
+        </Text>
+        <Text
+          style={[styles.bookAuthor, { color: colors.textMuted }]}
+          numberOfLines={1}
+        >
+          {book.auteur}
+        </Text>
+      </Pressable>
+      <View style={styles.favoriteOverlay}>
+        <FavoriteButton
+          favori={book.favori}
+          onPress={() => onToggleFavorite(book.id)}
+        />
       </View>
-      <Text
-        style={[styles.bookTitle, { color: colors.text }]}
-        numberOfLines={2}
-      >
-        {book.titre}
-      </Text>
-      <Text
-        style={[styles.bookAuthor, { color: colors.textMuted }]}
-        numberOfLines={1}
-      >
-        {book.auteur}
-      </Text>
-    </Pressable>
+    </View>
   );
 }
 
