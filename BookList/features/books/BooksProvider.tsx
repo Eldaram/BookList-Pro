@@ -88,10 +88,15 @@ export function BooksProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let ignore = false;
-    const init = async () => {
+
+    const loadBooks = async () => {
+      if (authService.getStatus() !== "authenticated") {
+        setLoading(false);
+        return;
+      }
+      setLoading(true);
       setError(null);
       try {
-        await authService.ensureAuthenticated();
         const response = await booksList.getBooks({
           page: 1,
           limit: DEFAULT_LIMIT,
@@ -114,9 +119,21 @@ export function BooksProvider({ children }: { children: React.ReactNode }) {
         if (!ignore) setLoading(false);
       }
     };
-    void init();
+
+    const unsubscribe = authService.subscribe((status) => {
+      if (status === "authenticated") {
+        void loadBooks();
+      } else if (status === "unauthenticated") {
+        setBooks([]);
+        replaceCachedBooks([]);
+      }
+    });
+
+    void loadBooks();
+
     return () => {
       ignore = true;
+      unsubscribe();
     };
   }, []);
 

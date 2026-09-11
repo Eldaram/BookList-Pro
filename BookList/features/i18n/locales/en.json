@@ -66,5 +66,19 @@
       "reset": "Reset to default cover",
       "error": "Unable to load the selected image."
     }
+  },
+  "auth": {
+    "loginTitle": "Sign In",
+    "loginSubtitle": "Please enter your credentials to access BookList Pro.",
+    "emailLabel": "Email address",
+    "emailPlaceholder": "e.g. editeur@booklist.fr",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "submit": "Sign In",
+    "submitting": "Signing in…",
+    "logout": "Log out",
+    "userRole": "Role: {{role}}",
+    "sessionExpired": "Your session has expired. Please log in again.",
+    "invalidCredentials": "Invalid email or password."
   }
 }

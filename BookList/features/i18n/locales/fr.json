@@ -66,5 +66,19 @@
       "reset": "Revenir a la couverture par defaut",
       "error": "Impossible de charger l'image selectionnee."
     }
+  },
+  "auth": {
+    "loginTitle": "Connexion",
+    "loginSubtitle": "Veuillez saisir vos identifiants pour accéder à BookList Pro.",
+    "emailLabel": "Adresse email",
+    "emailPlaceholder": "ex: editeur@booklist.fr",
+    "passwordLabel": "Mot de passe",
+    "passwordPlaceholder": "Entrez votre mot de passe",
+    "submit": "Se connecter",
+    "submitting": "Connexion en cours…",
+    "logout": "Déconnexion",
+    "userRole": "Rôle : {{role}}",
+    "sessionExpired": "Votre session a expiré. Veuillez vous reconnecter.",
+    "invalidCredentials": "Email ou mot de passe incorrect."
   }
 }

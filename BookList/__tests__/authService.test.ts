@@ -53,7 +53,6 @@ describe("AuthService Suite", () => {
         ),
     );
 
-    // Call refreshTokens 3 times simultaneously
     const p1 = authService.refreshTokens();
     const p2 = authService.refreshTokens();
     const p3 = authService.refreshTokens();
@@ -66,7 +65,7 @@ describe("AuthService Suite", () => {
     expect(t3).toBe("new-acc-tok");
   });
 
-  it("should clear session on logout", async () => {
+  it("should clear session and remove secure storage token on logout", async () => {
     await authService.logout();
 
     expect(authService.getAccessToken()).toBeNull();
@@ -75,5 +74,15 @@ describe("AuthService Suite", () => {
     expect(secureStorage.removeSecureItem).toHaveBeenCalledWith(
       "BOOKLIST_REFRESH_TOKEN",
     );
+  });
+
+  it("should throw AuthError when ensureAuthenticated is called without an active session or valid refresh token", async () => {
+    await authService.logout();
+    (secureStorage.getSecureItem as jest.Mock).mockResolvedValue(null);
+
+    await expect(authService.ensureAuthenticated()).rejects.toMatchObject({
+      type: "AUTH",
+      reason: "token_missing",
+    });
   });
 });

@@ -129,15 +129,11 @@ class AuthService {
       return this.accessToken;
     }
 
-    const email = process.env.EXPO_PUBLIC_ADMIN_USERNAME;
-    const password = process.env.EXPO_PUBLIC_ADMIN_PASSWORD;
-    await this.login(email, password);
-
-    if (this.accessToken) {
-      return this.accessToken;
-    }
-
-    throw new Error("Failed to establish authenticated session.");
+    throw {
+      type: "AUTH",
+      reason: "token_missing",
+      message: "Authentication required. Please log in.",
+    } satisfies AuthError;
   }
 
   async logout(reason: AuthStatus = "unauthenticated"): Promise<void> {

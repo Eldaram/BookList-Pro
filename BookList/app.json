@@ -33,7 +33,8 @@
         {
           "photosPermission": "BookList a besoin d'acceder a vos photos pour choisir une couverture."
         }
-      ]
+      ],
+      "expo-secure-store"
     ]
   }
 }

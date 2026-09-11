@@ -24,11 +24,12 @@ export default function I18nSelector() {
 
 const styles = StyleSheet.create({
   container: {
-    alignSelf: "center",
-    padding: 16,
+    justifyContent: "center",
   },
   picker: {
-    minHeight: 44,
-    width: 180,
+    borderRadius: 6,
+    fontSize: 13,
+    height: 34,
+    width: 145,
   },
 });

@@ -20,7 +20,14 @@ export default function ThemedPicker<T>({
     <Picker
       dropdownIconColor={colors.text}
       style={[
-        { backgroundColor: colors.background, color: colors.text },
+        {
+          backgroundColor: colors.background,
+          borderColor: colors.textMuted + "44",
+          borderRadius: 6,
+          borderWidth: 1,
+          color: colors.text,
+          paddingHorizontal: 8,
+        },
         style,
       ]}
       {...rest}
