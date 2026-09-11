@@ -105,7 +105,10 @@ async function fetchEnrichment(
   await waitForRequestSlot();
 
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), OPENLIBRARY_CONFIG.timeoutMs);
+  const timer = setTimeout(
+    () => controller.abort(),
+    OPENLIBRARY_CONFIG.timeoutMs,
+  );
 
   try {
     const response = await fetch(
