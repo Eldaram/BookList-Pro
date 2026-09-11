@@ -1,12 +1,11 @@
 import React from "react";
 import { Pressable, StyleSheet, View } from "react-native";
+import { ROLES } from "../../domain/auth";
 import { useAuth } from "../../features/auth/AuthProvider";
 import { useI18n } from "../../features/i18n/I18nProvider";
 import { useTheme } from "../../features/theme/ThemeProvider";
 import { spacing } from "../../theme/tokens";
 import ThemedText from "../ui/ThemedText";
-
-const EDITOR_ROLE = "editeur";
 
 export default function UserMenu() {
   const { user, logout } = useAuth();
@@ -15,7 +14,7 @@ export default function UserMenu() {
 
   if (!user) return null;
 
-  const isEditor = user.role === EDITOR_ROLE;
+  const isEditor = user.role === ROLES.EDITOR;
 
   return (
     <View style={styles.container}>

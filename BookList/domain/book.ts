@@ -1,3 +1,6 @@
+/**
+ * Core Book entity representing a catalogued publication.
+ */
 export type Book = {
   id: string;
   titre: string;
@@ -10,9 +13,13 @@ export type Book = {
   couverture: string | null;
   createdAt: string;
   updatedAt: string;
+  /** Version number used for optimistic locking and conflict detection */
   version: number;
 };
 
+/**
+ * Reading note associated with a specific book.
+ */
 export type BookNote = {
   id: string;
   livreId: string;
@@ -20,6 +27,9 @@ export type BookNote = {
   createdAt: string;
 };
 
+/**
+ * Paginated envelope returned by list queries.
+ */
 export type PaginatedBooks = {
   items: Book[];
   page: number;
@@ -28,6 +38,9 @@ export type PaginatedBooks = {
   totalPages: number;
 };
 
+/**
+ * Payload data for creating or updating a book.
+ */
 export type BookInput = {
   titre: string;
   auteur: string;
@@ -39,12 +52,28 @@ export type BookInput = {
   couverture?: string | null;
 };
 
+/**
+ * Supported sorting fields for book list queries.
+ */
+export const BOOK_SORT_FIELDS = [
+  "titre",
+  "auteur",
+  "annee",
+  "note",
+  "updatedAt",
+] as const;
+
+export type BookSortField = (typeof BOOK_SORT_FIELDS)[number];
+
+/**
+ * Query criteria and filters for fetching books.
+ */
 export type BookFilters = {
   page?: number;
   limit?: number;
   q?: string;
   status?: "lu" | "nonlu";
   favori?: boolean;
-  sort?: "titre" | "auteur" | "annee" | "note" | "updatedAt";
+  sort?: BookSortField;
   order?: "asc" | "desc";
 };
