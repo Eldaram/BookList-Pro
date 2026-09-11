@@ -6,7 +6,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { Book } from "../../domain/book";
+import { Book, BookFilters, PaginatedBooks } from "../../domain/book";
 import { AppError, isAppError } from "../../domain/error";
 import { authService } from "../../services/auth/authService";
 import { booksList } from "./booksList";
@@ -19,6 +19,16 @@ import {
 } from "./booksCache";
 import { toggleBookFavori } from "./bookFlagToggle";
 
+export type BookListFilters = Pick<
+  BookFilters,
+  "q" | "status" | "favori" | "sort" | "order"
+>;
+
+const toAppError = (err: unknown): AppError =>
+  isAppError(err)
+    ? err
+    : { type: "NETWORK", message: "Unexpected error", cause: err };
+
 export interface BooksContextValue {
   books: Book[];
   page: number;
@@ -30,6 +40,8 @@ export interface BooksContextValue {
   refreshing: boolean;
   error: AppError | null;
   scrollOffset: number;
+  filters: BookListFilters;
+  setFilters: (patch: Partial<BookListFilters>) => void;
   fetchNextPage: () => Promise<void>;
   refresh: () => Promise<void>;
   setScrollOffset: (offset: number) => void;
@@ -55,8 +67,10 @@ export function BooksProvider({ children }: { children: React.ReactNode }) {
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [error, setError] = useState<AppError | null>(null);
   const [scrollOffset, setScrollOffsetState] = useState<number>(0);
+  const [filters, setFiltersState] = useState<BookListFilters>({});
 
-  // Sync state to refs for stable async callbacks
+  const filtersRef = useRef<BookListFilters>({});
+  const abortRef = useRef<AbortController | null>(null);
   const pageRef = useRef(page);
   const hasMoreRef = useRef(hasMore);
   const loadingRef = useRef(loading);
@@ -75,7 +89,30 @@ export function BooksProvider({ children }: { children: React.ReactNode }) {
     setScrollOffsetState(offset);
   }, []);
 
-  // Reflete les patchs du cache (toggle favori optimiste, fiche detail) dans la liste
+  const setFilters = useCallback((patch: Partial<BookListFilters>) => {
+    setScrollOffsetState(0);
+    setLoading(true);
+    setError(null);
+    setFiltersState((prev) => ({ ...prev, ...patch }));
+  }, []);
+
+  const applyPage = useCallback((response: PaginatedBooks, append: boolean) => {
+    if (append) {
+      setBooks((prev) => {
+        const ids = new Set(prev.map((b) => b.id));
+        return [...prev, ...response.items.filter((b) => !ids.has(b.id))];
+      });
+      response.items.forEach(upsertCachedBook);
+    } else {
+      replaceCachedBooks(response.items);
+      setBooks(response.items);
+    }
+    setPage(response.page);
+    setTotalPages(response.totalPages);
+    setTotal(response.total);
+    setHasMore(response.page < response.totalPages);
+  }, []);
+
   useEffect(() => {
     return subscribeBooksCache(() => {
       const cached = getCachedBooks();
@@ -151,34 +188,19 @@ export function BooksProvider({ children }: { children: React.ReactNode }) {
     setLoadingMore(true);
 
     try {
-      const nextPage = pageRef.current + 1;
       const response = await booksList.getBooks({
-        page: nextPage,
+        page: pageRef.current + 1,
         limit: DEFAULT_LIMIT,
+        ...filtersRef.current,
       });
-
-      setBooks((prevBooks) => {
-        const existingIds = new Set(prevBooks.map((b) => b.id));
-        const newItems = response.items.filter((b) => !existingIds.has(b.id));
-        return [...prevBooks, ...newItems];
-      });
-      response.items.forEach(upsertCachedBook);
-
-      setPage(response.page);
-      setTotalPages(response.totalPages);
-      setTotal(response.total);
-      setHasMore(response.page < response.totalPages);
+      applyPage(response, true);
     } catch (err) {
-      setError(
-        isAppError(err)
-          ? err
-          : { type: "NETWORK", message: "Unexpected error", cause: err },
-      );
+      setError(toAppError(err));
     } finally {
       loadingMoreRef.current = false;
       setLoadingMore(false);
     }
-  }, []);
+  }, [applyPage]);
 
   const refresh = useCallback(async () => {
     if (refreshingRef.current) {
@@ -191,24 +213,16 @@ export function BooksProvider({ children }: { children: React.ReactNode }) {
       const response = await booksList.getBooks({
         page: 1,
         limit: DEFAULT_LIMIT,
+        ...filtersRef.current,
       });
-      replaceCachedBooks(response.items);
-      setBooks(response.items);
-      setPage(response.page);
-      setTotalPages(response.totalPages);
-      setTotal(response.total);
-      setHasMore(response.page < response.totalPages);
+      applyPage(response, false);
     } catch (err) {
-      setError(
-        isAppError(err)
-          ? err
-          : { type: "NETWORK", message: "Unexpected error", cause: err },
-      );
+      setError(toAppError(err));
     } finally {
       refreshingRef.current = false;
       setRefreshing(false);
     }
-  }, []);
+  }, [applyPage]);
 
   const addBookToList = useCallback((newBook: Book) => {
     setBooks((prev) => [newBook, ...prev.filter((b) => b.id !== newBook.id)]);
@@ -242,6 +256,8 @@ export function BooksProvider({ children }: { children: React.ReactNode }) {
         refreshing,
         error,
         scrollOffset,
+        filters,
+        setFilters,
         fetchNextPage,
         refresh,
         setScrollOffset,

@@ -85,6 +85,8 @@ export function useBooks(): BooksContextValue {
     refreshing: false,
     error: localError,
     scrollOffset: 0,
+    filters: {},
+    setFilters: () => {},
     fetchNextPage: async () => {},
     refresh: async () => {},
     setScrollOffset: () => {},

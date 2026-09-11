@@ -19,6 +19,7 @@ export type RequestOptions<T> = {
   skipAuth?: boolean;
   skipAutoRefresh?: boolean;
   timeoutMs?: number;
+  signal?: AbortSignal;
 };
 
 async function sleep(ms: number): Promise<void> {
@@ -63,6 +64,7 @@ class HttpClient {
       skipAuth = false,
       skipAutoRefresh = false,
       timeoutMs = API_CONFIG.defaultTimeoutMs,
+      signal,
     } = options;
 
     const fullUrl = endpoint.startsWith("http")
@@ -89,6 +91,12 @@ class HttpClient {
       try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+        // Relie l'annulation externe (recherche remplacee) au controleur interne.
+        if (signal?.aborted) controller.abort();
+        else
+          signal?.addEventListener("abort", () => controller.abort(), {
+            once: true,
+          });
 
         const response = await fetch(fullUrl, {
           method,
@@ -235,6 +243,15 @@ class HttpClient {
         // Re-throw typed domain errors
         if (isAppError(err)) {
           throw err;
+        }
+
+        // Annulation volontaire : ne pas reessayer.
+        if (signal?.aborted) {
+          throw {
+            type: "NETWORK",
+            message: "Request cancelled.",
+            cause: err,
+          } satisfies NetworkError;
         }
 
         // Retry on network failures if attempts remain

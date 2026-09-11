@@ -10,7 +10,7 @@ describe("API Config Validation", () => {
     delete process.env.EXPO_PUBLIC_API_URL;
     jest.resetModules();
 
-    await expect(import("../services/config")).rejects.toThrow(
+    await expect(import("../../../services/config")).rejects.toThrow(
       "[CONFIG ERROR] EXPO_PUBLIC_API_URL environment variable is missing.",
     );
   });
@@ -19,7 +19,7 @@ describe("API Config Validation", () => {
     process.env.EXPO_PUBLIC_API_URL = "http://localhost:3000";
     jest.resetModules();
 
-    const { API_CONFIG } = await import("../services/config");
+    const { API_CONFIG } = await import("../../../services/config");
     expect(API_CONFIG.baseUrl).toBe("http://localhost:3000");
   });
 });

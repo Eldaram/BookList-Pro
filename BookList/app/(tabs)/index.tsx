@@ -1,18 +1,16 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import BookList from "../../components/books/BookList";
-import { useI18n } from "../../features/i18n/I18nProvider";
-import { spacing, typography } from "../../theme/tokens";
+import BookToolbar from "../../components/books/BookToolbar";
+import { useBooks } from "../../hooks/useBooks";
+import { spacing } from "../../theme/tokens";
 
 export default function BooksScreen() {
-  const { t } = useI18n();
+  const { filters, setFilters } = useBooks();
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>{t("app.title")}</Text>
-        <Text style={styles.subtitle}>{t("app.subtitle")}</Text>
-      </View>
+      <BookToolbar filters={filters} onChange={setFilters} />
       <BookList />
       <StatusBar style="auto" />
     </View>
@@ -25,17 +23,5 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: spacing.md,
     paddingTop: spacing.lg,
-  },
-  header: {
-    alignItems: "center",
-    marginBottom: spacing.md,
-  },
-  subtitle: {
-    fontSize: typography.body,
-  },
-  title: {
-    fontSize: typography.title,
-    fontWeight: "700",
-    marginBottom: spacing.md,
   },
 });

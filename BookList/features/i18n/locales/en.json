@@ -23,9 +23,29 @@
     "allLoaded": "All books loaded",
     "error": "Unable to load books",
     "retry": "Retry",
+    "search": {
+      "placeholder": "Search by title or author…"
+    },
+    "filters": {
+      "read": "Read",
+      "unread": "Unread",
+      "favorites": "Favorites"
+    },
+    "sort": {
+      "label": "Sort",
+      "titre": "Title",
+      "auteur": "Author",
+      "annee": "Year",
+      "note": "Rating",
+      "orderAsc": "Ascending order",
+      "orderDesc": "Descending order"
+    },
     "favorite": {
       "add": "Add to favorites",
       "remove": "Remove from favorites"
+    },
+    "openLibrary": {
+      "editions": "{{count}} edition(s) referenced on OpenLibrary"
     },
     "read": {
       "read": "Read",

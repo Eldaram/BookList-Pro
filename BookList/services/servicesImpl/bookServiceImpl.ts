@@ -12,8 +12,11 @@ import {
  * Designed to support offline mutation queuing, caching, and persistence.
  */
 class BookServiceImpl {
-  async getBooks(filters: BookFilters = {}): Promise<PaginatedBooks> {
-    return booksApi.getBooks(filters);
+  async getBooks(
+    filters: BookFilters = {},
+    signal?: AbortSignal,
+  ): Promise<PaginatedBooks> {
+    return booksApi.getBooks(filters, signal);
   }
 
   async getBookById(id: string): Promise<Book> {

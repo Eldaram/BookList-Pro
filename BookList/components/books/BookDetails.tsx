@@ -15,6 +15,7 @@ import ConfirmDialog from "../ConfirmDialog";
 import DeleteButton from "../DeleteButton";
 import UndoBanner from "../UndoBanner";
 import BookNotes from "./BookNotes";
+import { useOpenLibrary } from "../../hooks/useOpenLibrary";
 
 const UNDO_DELAY_SECONDS = 5;
 
@@ -36,6 +37,7 @@ export default function BookDetails({
   const [secondsLeft, setSecondsLeft] = useState<number | null>(null);
   const [deleteError, setDeleteError] = useState<AppError | null>(null);
   const deletingRef = useRef(false);
+  const { enrichment } = useOpenLibrary(book.titre);
 
   const confirmDelete = () => {
     setShowConfirm(false);
@@ -89,7 +91,7 @@ export default function BookDetails({
           />
         </View>
         <View style={styles.coverWrapper}>
-          <BookCover uri={book.couverture} />
+          <BookCover uri={book.couverture} fallbackUri={enrichment?.coverUrl} />
         </View>
         <View style={styles.info}>
           <View style={styles.titleRow}>
@@ -108,6 +110,14 @@ export default function BookDetails({
           <View style={styles.readRow}>
             <ReadStatusToggle lu={book.lu} onPress={onToggleRead} />
           </View>
+          {enrichment && (
+            <Text style={[styles.description, { color: colors.textMuted }]}>
+              {t("books.openLibrary.editions").replace(
+                "{{count}}",
+                String(enrichment.editionCount),
+              )}
+            </Text>
+          )}
           {deleteError && (
             <Text style={[styles.errorText, { color: colors.danger }]}>
               {t("books.delete.error")}

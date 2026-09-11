@@ -1,7 +1,7 @@
-import { booksList } from "../features/books/booksList";
-import { bookServiceImpl } from "../services/servicesImpl/bookServiceImpl";
+import { booksList } from "../../../features/books/booksList";
+import { bookServiceImpl } from "../../../services/servicesImpl/bookServiceImpl";
 
-jest.mock("../services/servicesImpl/bookServiceImpl");
+jest.mock("../../../services/servicesImpl/bookServiceImpl");
 
 describe("Books Pagination Feature Suite", () => {
   beforeEach(() => {
@@ -36,10 +36,13 @@ describe("Books Pagination Feature Suite", () => {
 
     const result = await booksList.getBooks({ page: 2, limit: 10 });
 
-    expect(bookServiceImpl.getBooks).toHaveBeenCalledWith({
-      page: 2,
-      limit: 10,
-    });
+    expect(bookServiceImpl.getBooks).toHaveBeenCalledWith(
+      {
+        page: 2,
+        limit: 10,
+      },
+      undefined,
+    );
     expect(result).toEqual(mockPaginated);
     expect(result.page).toBe(2);
     expect(result.totalPages).toBe(2);
