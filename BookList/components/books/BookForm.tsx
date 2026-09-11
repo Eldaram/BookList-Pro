@@ -16,6 +16,7 @@ import { BooksContext } from "../../features/books/BooksProvider";
 import { spacing, typography } from "../../theme/tokens";
 import { useTheme } from "../../features/theme/ThemeProvider";
 import { useI18n } from "../../features/i18n/I18nProvider";
+import { useOpenLibrary } from "../../hooks/useOpenLibrary";
 import { pickCoverImage } from "../../services/servicesImpl/coverServiceImpl";
 import SaveButton from "../SaveButton";
 import BookCover from "./BookCover";
@@ -41,6 +42,8 @@ export default function BookForm({ mode, book }: Props) {
   );
   const [error, setError] = useState<AppError | null>(null);
   const [coverError, setCoverError] = useState<string | null>(null);
+  // Apercu OpenLibrary sur le titre saisi tant qu'aucune couverture locale n'est choisie.
+  const { enrichment } = useOpenLibrary(couverture ? undefined : titre);
 
   const addCover = async () => {
     setCoverError(null);
@@ -107,7 +110,11 @@ export default function BookForm({ mode, book }: Props) {
         ]}
       >
         <View style={styles.coverWrapper}>
-          <BookCover uri={couverture} />
+          <BookCover
+            uri={couverture}
+            fallbackUri={enrichment?.coverUrl}
+            title={titre}
+          />
           <TouchableOpacity
             style={[styles.coverButton, { backgroundColor: colors.primary }]}
             onPress={addCover}

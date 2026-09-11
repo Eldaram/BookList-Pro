@@ -1,6 +1,6 @@
 import * as ImagePicker from "expo-image-picker";
 import * as ImageManipulator from "expo-image-manipulator";
-import { FREEIMAGEHOST_CONFIG } from "../config";
+import { API_CONFIG, FREEIMAGEHOST_CONFIG } from "../config";
 
 const MAX_WIDTH = 480;
 const JPEG_COMPRESS = 0.6;
@@ -103,13 +103,18 @@ export async function uploadCoverToFreeImageHost(
 
 /**
  * Seule fonction du domaine chargee de resoudre l'URL affichable d'une
- * couverture (data URI, URL distante, ou null -> pas de couverture).
+ * couverture : chemin relatif prefixe par l'URL de base, URL absolue laissee
+ * intacte, valeur vide -> null (le composant affiche alors un repli local,
+ * l'API livree ne servant pas de route /covers/:id.svg).
  */
 export function resolveCoverUri(
   couverture: string | null | undefined,
 ): string | null {
-  if (!couverture || couverture.trim().length === 0) return null;
-  return couverture;
+  const value = couverture?.trim();
+  if (!value) return null;
+  // Chemin relatif servi par l'API (/media/...).
+  if (value.startsWith("/")) return `${API_CONFIG.baseUrl}${value}`;
+  return value;
 }
 
 /**
