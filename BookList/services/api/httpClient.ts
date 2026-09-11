@@ -17,7 +17,7 @@ export type RequestOptions<T> = {
   method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   headers?: Record<string, string>;
   body?: unknown;
-  schema?: z.ZodSchema<T>;
+  schema?: z.ZodType<T>;
   skipAuth?: boolean;
   skipAutoRefresh?: boolean;
   timeoutMs?: number;

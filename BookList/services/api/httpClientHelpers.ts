@@ -1,5 +1,4 @@
 import {
-  AppError,
   AuthError,
   AuthReason,
   ConflictError,
@@ -23,14 +22,7 @@ export function mapApiAuthReason(serverReason?: unknown): AuthReason {
   }
 }
 
-export function isAppError(err: unknown): err is AppError {
-  if (typeof err !== "object" || err === null) return false;
-  const type = (err as { type?: string }).type;
-  return (
-    typeof type === "string" &&
-    ["AUTH", "VALIDATION", "CONFLICT", "SERVER", "NETWORK"].includes(type)
-  );
-}
+export { isAppError } from "../../domain/error";
 
 export function handleHttpStatusError(
   status: number,

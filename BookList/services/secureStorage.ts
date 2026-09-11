@@ -2,6 +2,9 @@ import * as SecureStore from "expo-secure-store";
 
 const inMemoryStore = new Map<string, string>();
 
+const isWeb =
+  typeof window !== "undefined" && typeof window.document !== "undefined";
+
 /**
  * Executes a SecureStore action if native storage is available,
  * falling back gracefully to web localStorage or in-memory storage.
@@ -10,12 +13,14 @@ async function executeWithFallback<T>(
   secureAction: () => Promise<T>,
   fallbackAction: () => T | Promise<T>,
 ): Promise<T> {
-  try {
-    if (await SecureStore.isAvailableAsync()) {
-      return await secureAction();
+  if (!isWeb) {
+    try {
+      if (await SecureStore.isAvailableAsync()) {
+        return await secureAction();
+      }
+    } catch {
+      // SecureStore not available, continue to fallback
     }
-  } catch {
-    // SecureStore not available, continue to fallback
   }
 
   try {

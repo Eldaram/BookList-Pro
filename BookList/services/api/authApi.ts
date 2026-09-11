@@ -5,18 +5,19 @@ import {
 } from "./schemas";
 import { API_CONFIG } from "../config";
 import { z } from "zod";
-import { AuthError, AuthReason, NetworkError } from "../../domain/error";
+import {
+  AuthError,
+  AuthReason,
+  NetworkError,
+  isAppError,
+} from "../../domain/error";
 
 export type LoginResponse = z.infer<typeof loginResponseSchema>;
 export type RefreshResponse = z.infer<typeof refreshResponseSchema>;
 export type MeResponse = z.infer<typeof meResponseSchema>;
 
 function isAuthError(err: unknown): err is AuthError {
-  return (
-    typeof err === "object" &&
-    err !== null &&
-    (err as { type?: string }).type === "AUTH"
-  );
+  return isAppError(err) && err.type === "AUTH";
 }
 
 function getErrorMessage(err: unknown, defaultMsg: string): string {

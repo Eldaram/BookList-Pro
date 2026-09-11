@@ -1,10 +1,11 @@
 import { z } from "zod";
+import { ROLES } from "../../domain/auth";
 
-export const userRoleSchema = z.enum(["editeur", "lecteur"]);
+export const userRoleSchema = z.enum(ROLES);
 
 export const userSchema = z.object({
   id: z.string(),
-  email: z.email(),
+  email: z.string(),
   role: userRoleSchema,
   authRequise: z.boolean().optional(),
 });

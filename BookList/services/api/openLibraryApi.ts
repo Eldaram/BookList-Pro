@@ -1,7 +1,8 @@
 import { z } from "zod";
 
-// Enrichissement bibliographique (lot 3) : cache memoire + delai d'expiration.
-// Toute erreur se degrade silencieusement en null : la fiche ne casse jamais.
+/**
+ * Bibliographic enrichment: in-memory cache and silent fallback to null on error.
+ */
 
 const OPENLIBRARY_SEARCH_URL = "https://openlibrary.org/search.json";
 const OPENLIBRARY_COVER_URL = "https://covers.openlibrary.org/b/id";
@@ -61,7 +62,7 @@ export async function searchByTitle(
     cache.set(key, enrichment);
     return enrichment;
   } catch {
-    // Degradation silencieuse exigee : OpenLibrary indisponible = pas d'enrichissement.
+    // Silent degradation: when OpenLibrary is unavailable, gracefully return null.
     return null;
   } finally {
     clearTimeout(timer);

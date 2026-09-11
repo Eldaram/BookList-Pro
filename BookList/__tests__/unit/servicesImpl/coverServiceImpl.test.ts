@@ -41,8 +41,9 @@ describe("Covers", () => {
     });
     global.fetch = jest.fn().mockResolvedValue({
       ok: true,
-      json: async () => ({}),
-      text: async () => "https://files.catbox.moe/cover.jpg",
+      json: async () => ({
+        image: { url: "https://files.catbox.moe/cover.jpg" },
+      }),
     } as unknown as Response);
 
     const result = await pickCoverImage();
