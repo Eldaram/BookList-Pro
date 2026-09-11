@@ -8,6 +8,7 @@ import React, {
 } from "react";
 import { Book, BookFilters, PaginatedBooks } from "../../domain/book";
 import { AppError, isAppError } from "../../domain/error";
+import { authService } from "../../services/auth/authService";
 import { booksList } from "./booksList";
 import {
   getCachedBook,
@@ -122,32 +123,39 @@ export function BooksProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  // Annule la requete precedente : seule la derniere recherche fait foi.
-  // Les etats loading/error sont poses par setFilters (ou l'etat initial),
-  // jamais de facon synchrone ici : l'effet ne fait que lancer la requete.
-  const loadInitialBooks = useCallback(async () => {
-    abortRef.current?.abort();
-    const controller = new AbortController();
-    abortRef.current = controller;
-    try {
-      const response = await booksList.getBooks(
-        { page: 1, limit: DEFAULT_LIMIT, ...filtersRef.current },
-        controller.signal,
-      );
-      if (controller.signal.aborted) return;
-      applyPage(response, false);
-      setError(null);
-    } catch (err) {
-      if (!controller.signal.aborted) setError(toAppError(err));
-    } finally {
-      if (!controller.signal.aborted) setLoading(false);
-    }
-  }, [applyPage]);
-
   useEffect(() => {
-    filtersRef.current = filters;
-    loadInitialBooks();
-  }, [filters, loadInitialBooks]);
+    let ignore = false;
+    const init = async () => {
+      setError(null);
+      try {
+        await authService.ensureAuthenticated();
+        const response = await booksList.getBooks({
+          page: 1,
+          limit: DEFAULT_LIMIT,
+        });
+        if (ignore) return;
+        replaceCachedBooks(response.items);
+        setBooks(response.items);
+        setPage(response.page);
+        setTotalPages(response.totalPages);
+        setTotal(response.total);
+        setHasMore(response.page < response.totalPages);
+      } catch (err) {
+        if (ignore) return;
+        setError(
+          isAppError(err)
+            ? err
+            : { type: "NETWORK", message: "Unexpected error", cause: err },
+        );
+      } finally {
+        if (!ignore) setLoading(false);
+      }
+    };
+    void init();
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   const fetchNextPage = useCallback(async () => {
     if (

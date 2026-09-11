@@ -16,3 +16,9 @@ export const API_CONFIG = {
   defaultTimeoutMs: 10000,
   maxRetries503: 3,
 };
+
+export const FREEIMAGEHOST_CONFIG = {
+  uploadUrl: "https://freeimage.host/api/1/upload",
+  apiKey: process.env.EXPO_PUBLIC_FREEIMAGEHOST_API_KEY,
+  maxFileSizeBytes: 63 * 1024 * 1024, // 63 MB max file size limit
+};
