@@ -1,13 +1,10 @@
 import { z } from "zod";
+import { OPENLIBRARY_CONFIG } from "../config";
 import { secureStorage } from "../secureStorage";
 
 /**
  * Bibliographic enrichment: in-memory cache and silent fallback to null on error.
  */
-
-const OPENLIBRARY_SEARCH_URL = "https://openlibrary.org/search.json";
-const OPENLIBRARY_COVER_URL = "https://covers.openlibrary.org/b/id";
-const TIMEOUT_MS = 5000;
 
 const searchResponseSchema = z.object({
   numFound: z.number(),
@@ -29,17 +26,14 @@ const cache = new Map<string, OpenLibraryEnrichment>();
 // Echecs memorises avec TTL : ne pas marteler OpenLibrary quand il est indisponible.
 const failedAt = new Map<string, number>();
 const inflight = new Map<string, Promise<OpenLibraryEnrichment | null>>();
-const FAILURE_TTL_MS = 60_000;
 
-// Espacement minimal entre deux appels reseau : la liste peut demander
-// 20 covers d'un coup, OpenLibrary bloque les rafales par IP.
-const MIN_REQUEST_INTERVAL_MS = 700;
 let nextRequestSlot = 0;
 
 async function waitForRequestSlot(): Promise<void> {
   const now = Date.now();
   const wait = Math.max(0, nextRequestSlot - now);
-  nextRequestSlot = Math.max(now, nextRequestSlot) + MIN_REQUEST_INTERVAL_MS;
+  nextRequestSlot =
+    Math.max(now, nextRequestSlot) + OPENLIBRARY_CONFIG.minRequestIntervalMs;
   if (wait > 0) {
     await new Promise((resolve) => setTimeout(resolve, wait));
   }
@@ -92,7 +86,9 @@ export async function searchByTitle(
   if (cached) return cached;
 
   const failed = failedAt.get(key);
-  if (failed && Date.now() - failed < FAILURE_TTL_MS) return null;
+  if (failed && Date.now() - failed < OPENLIBRARY_CONFIG.failureTtlMs) {
+    return null;
+  }
 
   // Deduplication en vol : un seul appel reseau par titre a la fois.
   const pending = inflight.get(key);
@@ -109,11 +105,14 @@ async function fetchEnrichment(
   await waitForRequestSlot();
 
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+  const timer = setTimeout(
+    () => controller.abort(),
+    OPENLIBRARY_CONFIG.timeoutMs,
+  );
 
   try {
     const response = await fetch(
-      `${OPENLIBRARY_SEARCH_URL}?title=${encodeURIComponent(key)}&limit=5`,
+      `${OPENLIBRARY_CONFIG.searchUrl}?title=${encodeURIComponent(key)}&limit=5`,
       { signal: controller.signal },
     );
     if (!response.ok) {
@@ -135,7 +134,7 @@ async function fetchEnrichment(
       editionCount: numFound,
       firstPublishYear: withYear?.first_publish_year ?? null,
       coverUrl: withCover
-        ? `${OPENLIBRARY_COVER_URL}/${withCover.cover_i}-M.jpg`
+        ? `${OPENLIBRARY_CONFIG.coverBaseUrl}/${withCover.cover_i}-M.jpg`
         : null,
     };
     cache.set(key, enrichment);
