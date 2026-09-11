@@ -1,11 +1,11 @@
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import { ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { Controller, useForm } from "react-hook-form";
 import { useRouter } from "expo-router";
 import { Book, BookInput } from "../../domain/book";
 import { AppError, isAppError } from "../../domain/error";
 import { booksList } from "../../features/books/booksList";
-import { BooksContext } from "../../features/books/BooksProvider";
+import { useBooksContext } from "../../features/books/BooksProvider";
 import { useI18n } from "../../features/i18n/I18nProvider";
 import { useTheme } from "../../features/theme/ThemeProvider";
 import { pickCoverImage } from "../../services/servicesImpl/coverServiceImpl";
@@ -31,7 +31,7 @@ export default function BookForm({ mode, book }: Props) {
   const router = useRouter();
   const { colors } = useTheme();
   const { t } = useI18n();
-  const booksContext = useContext(BooksContext);
+  const { addBookToList, updateBookInList } = useBooksContext();
 
   const [couverture, setCouverture] = useState<string | null>(
     book?.couverture ?? null,
@@ -87,9 +87,9 @@ export default function BookForm({ mode, book }: Props) {
           : await booksList.updateBook(book!.id, input, book!.version);
 
       if (mode === "CREATE") {
-        booksContext?.addBookToList(saved);
+        addBookToList(saved);
       } else {
-        booksContext?.updateBookInList(saved);
+        updateBookInList(saved);
       }
       router.replace(`/books/${saved.id}`);
     } catch (err) {

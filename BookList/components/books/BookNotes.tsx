@@ -15,19 +15,13 @@ import { spacing, typography } from "../../theme/tokens";
 
 const MAX_LENGTH = 1000;
 
-const formatDate = (iso: string, locale: string) =>
-  new Date(iso).toLocaleString(locale, {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
-
 type Props = {
   bookId: string;
 };
 
 export default function BookNotes({ bookId }: Props) {
   const { colors } = useTheme();
-  const { t, locale } = useI18n();
+  const { t, formatDate } = useI18n();
   const { notes, loading, saving, error, addNote, removeNote } =
     useBookNotes(bookId);
   const [draft, setDraft] = useState("");
@@ -105,7 +99,10 @@ export default function BookNotes({ bookId }: Props) {
           >
             <View style={styles.noteBody}>
               <Text style={[styles.noteDate, { color: colors.textMuted }]}>
-                {formatDate(note.createdAt, locale)}
+                {formatDate(note.createdAt, {
+                  dateStyle: "medium",
+                  timeStyle: "short",
+                })}
               </Text>
               <Text style={[styles.noteContent, { color: colors.text }]}>
                 {note.contenu}

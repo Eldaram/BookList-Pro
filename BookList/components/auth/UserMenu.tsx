@@ -6,12 +6,16 @@ import { useTheme } from "../../features/theme/ThemeProvider";
 import { spacing } from "../../theme/tokens";
 import ThemedText from "../ui/ThemedText";
 
+const EDITOR_ROLE = "editeur";
+
 export default function UserMenu() {
   const { user, logout } = useAuth();
   const { t } = useI18n();
   const { colors } = useTheme();
 
   if (!user) return null;
+
+  const isEditor = user.role === EDITOR_ROLE;
 
   return (
     <View style={styles.container}>
@@ -23,10 +27,9 @@ export default function UserMenu() {
           style={[
             styles.roleBadge,
             {
-              backgroundColor:
-                user.role === "editeur"
-                  ? colors.primary + "33"
-                  : colors.textMuted + "33",
+              backgroundColor: isEditor
+                ? colors.primary + "33"
+                : colors.textMuted + "33",
             },
           ]}
         >
@@ -34,8 +37,7 @@ export default function UserMenu() {
             style={[
               styles.roleText,
               {
-                color:
-                  user.role === "editeur" ? colors.primary : colors.textMuted,
+                color: isEditor ? colors.primary : colors.textMuted,
               },
             ]}
           >

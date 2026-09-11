@@ -105,7 +105,9 @@ export default function BookDetails({
           </Text>
           <Text style={[styles.description, { color: colors.text }]}>
             {book.editeur} · {book.annee}
-            {book.note !== null ? ` · Note : ${book.note}/5` : ""}
+            {book.note !== null
+              ? ` · ${t("books.sort.note")} : ${book.note}/5`
+              : ""}
           </Text>
           <View style={styles.readRow}>
             <ReadStatusToggle lu={book.lu} onPress={onToggleRead} />

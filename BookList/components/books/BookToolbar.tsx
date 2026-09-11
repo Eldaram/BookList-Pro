@@ -64,8 +64,7 @@ export default function BookToolbar({ filters, onChange }: Props) {
     const next = debouncedQuery.trim();
     if (next === (filters.q ?? "")) return;
     onChange({ q: next || undefined });
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- seul le texte anti-rebondi declenche la recherche
-  }, [debouncedQuery]);
+  }, [debouncedQuery, filters.q, onChange]);
 
   const toggleStatus = (status: "lu" | "nonlu") =>
     onChange({ status: filters.status === status ? undefined : status });

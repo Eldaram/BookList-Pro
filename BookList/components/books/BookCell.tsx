@@ -1,13 +1,12 @@
 import React, { memo } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text } from "react-native";
 import { Book } from "../../domain/book";
-import { spacing, typography } from "../../theme/tokens";
+import { typography } from "../../theme/tokens";
 import { useTheme } from "../../features/theme/ThemeProvider";
 import { useOpenLibrary } from "../../hooks/useOpenLibrary";
 import BookCover from "./BookCover";
+import BookCardShell from "./BookCardShell";
 import FavoriteButton from "../FavoriteButton";
-
-const CELL_TARGET_WIDTH = 160;
 
 type Props = {
   book: Book;
@@ -16,71 +15,54 @@ type Props = {
   onToggleFavorite: (id: string) => void;
 };
 
-// Memoise pour que la frappe dans la recherche ou un toggle sur une autre
-// cellule ne re-rende pas toute la grille (exigence "aucun rendu superflu").
 function BookCell({ book, numColumns, onOpen, onToggleFavorite }: Props) {
   const { colors } = useTheme();
-  // Fallback OpenLibrary uniquement si le livre n'a pas de couverture locale.
   const { enrichment } = useOpenLibrary(
     book.couverture ? undefined : book.titre,
   );
 
-  // FavoriteButton hors du Pressable : un <button> HTML ne peut pas en contenir un autre.
   return (
-    <View style={[styles.cell, { flex: 1 / numColumns }]}>
-      <Pressable
-        onPress={() => onOpen(book.id)}
-        accessibilityRole="button"
-        accessibilityLabel={book.titre}
-      >
-        <View style={styles.coverWrapper}>
-          <BookCover uri={book.couverture} fallbackUri={enrichment?.coverUrl} />
-        </View>
+    <BookCardShell
+      numColumns={numColumns}
+      onPress={() => onOpen(book.id)}
+      accessibilityLabel={book.titre}
+      cover={
+        <BookCover uri={book.couverture} fallbackUri={enrichment?.coverUrl} />
+      }
+      action={
+        <FavoriteButton
+          favori={book.favori}
+          onPress={() => onToggleFavorite(book.id)}
+        />
+      }
+      title={
         <Text
           style={[styles.bookTitle, { color: colors.text }]}
           numberOfLines={2}
         >
           {book.titre}
         </Text>
+      }
+      subtitle={
         <Text
           style={[styles.bookAuthor, { color: colors.textMuted }]}
           numberOfLines={1}
         >
           {book.auteur}
         </Text>
-      </Pressable>
-      <View style={styles.favoriteOverlay}>
-        <FavoriteButton
-          favori={book.favori}
-          onPress={() => onToggleFavorite(book.id)}
-        />
-      </View>
-    </View>
+      }
+    />
   );
 }
 
 export default memo(BookCell);
 
 const styles = StyleSheet.create({
-  cell: {
-    marginBottom: spacing.lg,
-    marginHorizontal: spacing.md,
-    maxWidth: CELL_TARGET_WIDTH + spacing.md * 2,
-  },
-  coverWrapper: {
-    position: "relative",
-  },
-  favoriteOverlay: {
-    position: "absolute",
-    right: 0,
-    top: 0,
+  bookAuthor: {
+    fontSize: typography.body,
   },
   bookTitle: {
     fontSize: typography.body,
     fontWeight: "700",
-    marginTop: spacing.md,
-  },
-  bookAuthor: {
-    fontSize: typography.body,
   },
 });
