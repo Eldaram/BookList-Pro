@@ -110,7 +110,11 @@ export default function BookForm({ mode, book }: Props) {
         ]}
       >
         <View style={styles.coverWrapper}>
-          <BookCover uri={couverture} fallbackUri={enrichment?.coverUrl} />
+          <BookCover
+            uri={couverture}
+            fallbackUri={enrichment?.coverUrl}
+            title={titre}
+          />
           <TouchableOpacity
             style={[styles.coverButton, { backgroundColor: colors.primary }]}
             onPress={addCover}

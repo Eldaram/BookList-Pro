@@ -20,7 +20,8 @@ type Props = {
 // cellule ne re-rende pas toute la grille (exigence "aucun rendu superflu").
 function BookCell({ book, numColumns, onOpen, onToggleFavorite }: Props) {
   const { colors } = useTheme();
-  // Fallback OpenLibrary uniquement si le livre n'a pas de couverture locale.
+  // Fallback OpenLibrary uniquement si le livre n'a pas de couverture locale ;
+  // les appels sont espaces et caches dans openLibraryApi pour eviter le blocage.
   const { enrichment } = useOpenLibrary(
     book.couverture ? undefined : book.titre,
   );
@@ -34,7 +35,11 @@ function BookCell({ book, numColumns, onOpen, onToggleFavorite }: Props) {
         accessibilityLabel={book.titre}
       >
         <View style={styles.coverWrapper}>
-          <BookCover uri={book.couverture} fallbackUri={enrichment?.coverUrl} />
+          <BookCover
+            uri={book.couverture}
+            fallbackUri={enrichment?.coverUrl}
+            title={book.titre}
+          />
         </View>
         <Text
           style={[styles.bookTitle, { color: colors.text }]}
