@@ -13,34 +13,33 @@ export function useOpenLibrary(titre: string | undefined) {
   const debouncedTitre = useDebouncedValue(titre);
 
   useEffect(() => {
+    if (!debouncedTitre) return;
+
     let cancelled = false;
 
-    if (!debouncedTitre) {
-      Promise.resolve().then(() => {
+    const fetchEnrichment = async () => {
+      setLoading(true);
+      try {
+        const result = await searchByTitle(debouncedTitre);
         if (!cancelled) {
-          setEnrichment(null);
+          setEnrichment(result);
+        }
+      } finally {
+        if (!cancelled) {
           setLoading(false);
         }
-      });
-      return;
-    }
+      }
+    };
 
-    Promise.resolve().then(() => {
-      if (!cancelled) setLoading(true);
-    });
-
-    searchByTitle(debouncedTitre)
-      .then((result) => {
-        if (!cancelled) setEnrichment(result);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
+    void fetchEnrichment();
 
     return () => {
       cancelled = true;
     };
   }, [debouncedTitre]);
 
-  return { enrichment, loading };
+  return {
+    enrichment: debouncedTitre ? enrichment : null,
+    loading: debouncedTitre ? loading : false,
+  };
 }

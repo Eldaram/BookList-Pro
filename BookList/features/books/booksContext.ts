@@ -1,16 +1,13 @@
 import { createContext, useContext } from "react";
 import { Book, BookFilters } from "../../domain/book";
-import { AppError, isAppError } from "../../domain/error";
+import { AppError, toAppError } from "../../domain/error";
+
+export { toAppError };
 
 export type BookListFilters = Pick<
   BookFilters,
   "q" | "status" | "favori" | "sort" | "order"
 >;
-
-export const toAppError = (err: unknown): AppError =>
-  isAppError(err)
-    ? err
-    : { type: "NETWORK", message: "Unexpected error", cause: err };
 
 export interface BooksContextValue {
   books: Book[];

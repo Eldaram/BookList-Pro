@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useFocusEffect } from "expo-router";
 import { Book } from "../domain/book";
-import { AppError, isAppError } from "../domain/error";
+import { AppError, toAppError } from "../domain/error";
 import { booksList } from "../features/books/booksList";
 import {
   getCachedBook,
@@ -37,11 +37,7 @@ export function useBook(id: string | undefined) {
       setBook(freshBook);
       setError(null);
     } catch (err) {
-      setError(
-        isAppError(err)
-          ? err
-          : { type: "NETWORK", message: "Unexpected error", cause: err },
-      );
+      setError(toAppError(err));
     } finally {
       setLoading(false);
     }

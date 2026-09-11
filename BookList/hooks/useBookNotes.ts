@@ -1,12 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { BookNote } from "../domain/book";
-import { AppError, isAppError } from "../domain/error";
+import { AppError, toAppError } from "../domain/error";
 import { booksList } from "../features/books/booksList";
-
-const toAppError = (err: unknown): AppError =>
-  isAppError(err)
-    ? err
-    : { type: "NETWORK", message: "Unexpected error", cause: err };
 
 export function useBookNotes(bookId: string | undefined) {
   const [notes, setNotes] = useState<BookNote[]>([]);

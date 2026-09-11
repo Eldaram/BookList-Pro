@@ -83,3 +83,11 @@ export function isAppError(err: unknown): err is AppError {
   const type = (err as { type?: unknown }).type;
   return typeof type === "string" && APP_ERROR_TYPE_SET.has(type);
 }
+
+/**
+ * Normalizes an unknown caught error into a typed AppError.
+ */
+export const toAppError = (err: unknown): AppError =>
+  isAppError(err)
+    ? err
+    : { type: "NETWORK", message: "Unexpected error", cause: err };
