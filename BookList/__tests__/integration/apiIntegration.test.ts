@@ -1,10 +1,10 @@
 import { spawn, ChildProcess } from "child_process";
 import path from "path";
-import { authService } from "../services/auth/authService";
-import { bookServiceImpl } from "../services/servicesImpl/bookServiceImpl";
-import { httpClient } from "../services/api/httpClient";
+import { authService } from "../../services/auth/authService";
+import { bookServiceImpl } from "../../services/servicesImpl/bookServiceImpl";
+import { httpClient } from "../../services/api/httpClient";
 
-const API_DIR = path.resolve(__dirname, "../../api-books-v2");
+const API_DIR = path.resolve(__dirname, "../../../api-books-v2");
 const API_URL = process.env.EXPO_PUBLIC_API_URL || "http://localhost:3000";
 const ADMIN_USERNAME = process.env.EXPO_PUBLIC_ADMIN_USERNAME;
 const ADMIN_PASSWORD = process.env.EXPO_PUBLIC_ADMIN_PASSWORD;
