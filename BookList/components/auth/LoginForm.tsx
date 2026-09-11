@@ -6,126 +6,74 @@ import {
   TextInput,
   View,
 } from "react-native";
+import { Controller, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "../../features/auth/AuthProvider";
-import { loginSchema } from "../../features/auth/authFormSchema";
+import { LoginFormData, loginSchema } from "../../features/auth/authFormSchema";
 import { useI18n } from "../../features/i18n/I18nProvider";
 import { useTheme } from "../../features/theme/ThemeProvider";
-import { spacing, typography } from "../../theme/tokens";
+import { spacing } from "../../theme/tokens";
 import ThemedText from "../ui/ThemedText";
+import LoginFormHeader from "./LoginFormHeader";
 
 export default function LoginForm() {
   const { t } = useI18n();
   const { colors } = useTheme();
   const { login } = useAuth();
+  const [serverError, setServerError] = useState<string | null>(null);
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [fieldErrors, setFieldErrors] = useState<{
-    email?: string;
-    password?: string;
-  }>({});
-  const [formError, setFormError] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: "", password: "" },
+  });
 
-  const handleSubmit = async () => {
-    setFormError(null);
-    setFieldErrors({});
-
-    const validationResult = loginSchema.safeParse({ email, password });
-    if (!validationResult.success) {
-      const formattedErrors: { email?: string; password?: string } = {};
-      for (const issue of validationResult.error.issues) {
-        if (issue.path[0] === "email" && !formattedErrors.email) {
-          formattedErrors.email = issue.message;
-        }
-        if (issue.path[0] === "password" && !formattedErrors.password) {
-          formattedErrors.password = issue.message;
-        }
-      }
-      setFieldErrors(formattedErrors);
-      return;
-    }
-
-    setSubmitting(true);
-
+  const onSubmit = async (data: LoginFormData) => {
+    setServerError(null);
     try {
-      await login(email.trim(), password);
-    } catch (err: unknown) {
-      if (
-        typeof err === "object" &&
-        err !== null &&
-        "type" in err &&
-        (err as { type: string }).type === "AUTH"
-      ) {
-        setFormError(t("auth.invalidCredentials"));
-      } else if (
-        err instanceof Error &&
-        err.message.includes("identifiants_invalides")
-      ) {
-        setFormError(t("auth.invalidCredentials"));
-      } else {
-        setFormError(
-          typeof err === "object" && err !== null && "message" in err
-            ? String((err as { message: unknown }).message)
-            : t("auth.invalidCredentials"),
-        );
-      }
-    } finally {
-      setSubmitting(false);
+      await login(data.email.trim(), data.password);
+    } catch {
+      setServerError(t("auth.invalidCredentials"));
     }
   };
 
   return (
     <View style={styles.container}>
       <View style={[styles.card, { backgroundColor: colors.background }]}>
-        <ThemedText style={styles.title}>{t("auth.loginTitle")}</ThemedText>
-        <ThemedText muted style={styles.subtitle}>
-          {t("auth.loginSubtitle")}
-        </ThemedText>
-
-        {formError ? (
-          <View
-            style={[
-              styles.errorBanner,
-              { backgroundColor: colors.danger + "22" },
-            ]}
-          >
-            <ThemedText
-              style={[styles.errorBannerText, { color: colors.danger }]}
-            >
-              {formError}
-            </ThemedText>
-          </View>
-        ) : null}
+        <LoginFormHeader error={serverError} />
 
         <View style={styles.inputGroup}>
           <ThemedText style={styles.label}>{t("auth.emailLabel")}</ThemedText>
-          <TextInput
-            autoCapitalize="none"
-            autoComplete="email"
-            keyboardType="email-address"
-            onChangeText={(val) => {
-              setEmail(val);
-              if (fieldErrors.email) {
-                setFieldErrors((prev) => ({ ...prev, email: undefined }));
-              }
-            }}
-            placeholder={t("auth.emailPlaceholder")}
-            placeholderTextColor={colors.textMuted}
-            style={[
-              styles.input,
-              {
-                borderColor: fieldErrors.email
-                  ? colors.danger
-                  : colors.textMuted,
-                color: colors.text,
-              },
-            ]}
-            value={email}
+          <Controller
+            control={control}
+            name="email"
+            render={({ field: { onChange, value } }) => (
+              <TextInput
+                autoCapitalize="none"
+                autoComplete="email"
+                keyboardType="email-address"
+                onChangeText={onChange}
+                placeholder={t("auth.emailPlaceholder")}
+                placeholderTextColor={colors.textMuted}
+                style={[
+                  styles.input,
+                  {
+                    borderColor: errors.email
+                      ? colors.danger
+                      : colors.textMuted,
+                    color: colors.text,
+                  },
+                ]}
+                value={value}
+              />
+            )}
           />
-          {fieldErrors.email ? (
+          {errors.email?.message ? (
             <ThemedText style={[styles.fieldError, { color: colors.danger }]}>
-              {fieldErrors.email}
+              {errors.email.message}
             </ThemedText>
           ) : null}
         </View>
@@ -134,47 +82,48 @@ export default function LoginForm() {
           <ThemedText style={styles.label}>
             {t("auth.passwordLabel")}
           </ThemedText>
-          <TextInput
-            autoCapitalize="none"
-            onChangeText={(val) => {
-              setPassword(val);
-              if (fieldErrors.password) {
-                setFieldErrors((prev) => ({ ...prev, password: undefined }));
-              }
-            }}
-            placeholder={t("auth.passwordPlaceholder")}
-            placeholderTextColor={colors.textMuted}
-            secureTextEntry
-            style={[
-              styles.input,
-              {
-                borderColor: fieldErrors.password
-                  ? colors.danger
-                  : colors.textMuted,
-                color: colors.text,
-              },
-            ]}
-            value={password}
+          <Controller
+            control={control}
+            name="password"
+            render={({ field: { onChange, value } }) => (
+              <TextInput
+                autoCapitalize="none"
+                onChangeText={onChange}
+                placeholder={t("auth.passwordPlaceholder")}
+                placeholderTextColor={colors.textMuted}
+                secureTextEntry
+                style={[
+                  styles.input,
+                  {
+                    borderColor: errors.password
+                      ? colors.danger
+                      : colors.textMuted,
+                    color: colors.text,
+                  },
+                ]}
+                value={value}
+              />
+            )}
           />
-          {fieldErrors.password ? (
+          {errors.password?.message ? (
             <ThemedText style={[styles.fieldError, { color: colors.danger }]}>
-              {fieldErrors.password}
+              {errors.password.message}
             </ThemedText>
           ) : null}
         </View>
 
         <Pressable
-          disabled={submitting}
-          onPress={() => void handleSubmit()}
+          disabled={isSubmitting}
+          onPress={handleSubmit(onSubmit)}
           style={({ pressed }) => [
             styles.submitButton,
             {
               backgroundColor: colors.primary,
-              opacity: submitting || pressed ? 0.7 : 1,
+              opacity: isSubmitting || pressed ? 0.7 : 1,
             },
           ]}
         >
-          {submitting ? (
+          {isSubmitting ? (
             <ActivityIndicator color={colors.textOnPrimary} />
           ) : (
             <ThemedText
@@ -208,16 +157,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     padding: spacing.md,
   },
-  errorBanner: {
-    borderRadius: 8,
-    marginBottom: spacing.md,
-    padding: spacing.md,
-  },
-  errorBannerText: {
-    fontSize: 14,
-    fontWeight: "600",
-    textAlign: "center",
-  },
   fieldError: {
     fontSize: 12,
     marginTop: 4,
@@ -247,14 +186,5 @@ const styles = StyleSheet.create({
   submitButtonText: {
     fontSize: 16,
     fontWeight: "700",
-  },
-  subtitle: {
-    fontSize: 14,
-    marginBottom: spacing.lg,
-  },
-  title: {
-    fontSize: typography.title,
-    fontWeight: "700",
-    marginBottom: 4,
   },
 });

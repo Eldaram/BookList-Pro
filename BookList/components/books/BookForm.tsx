@@ -1,24 +1,17 @@
 import React, { useContext, useState } from "react";
-import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
-import { MaterialIcons } from "@expo/vector-icons";
+import { ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { Controller, useForm } from "react-hook-form";
 import { useRouter } from "expo-router";
-import { Book } from "../../domain/book";
+import { Book, BookInput } from "../../domain/book";
 import { AppError, isAppError } from "../../domain/error";
 import { booksList } from "../../features/books/booksList";
 import { BooksContext } from "../../features/books/BooksProvider";
-import { spacing, typography } from "../../theme/tokens";
-import { useTheme } from "../../features/theme/ThemeProvider";
 import { useI18n } from "../../features/i18n/I18nProvider";
+import { useTheme } from "../../features/theme/ThemeProvider";
 import { pickCoverImage } from "../../services/servicesImpl/coverServiceImpl";
+import { spacing, typography } from "../../theme/tokens";
 import SaveButton from "../SaveButton";
-import BookCover from "./BookCover";
+import BookFormCoverSection from "./BookFormCoverSection";
 
 export type BookFormMode = "CREATE" | "UPDATE";
 
@@ -27,20 +20,38 @@ type Props = {
   book?: Book;
 };
 
+type FormData = {
+  titre: string;
+  auteur: string;
+  editeur: string;
+  annee: string;
+};
+
 export default function BookForm({ mode, book }: Props) {
   const router = useRouter();
   const { colors } = useTheme();
   const { t } = useI18n();
   const booksContext = useContext(BooksContext);
-  const [titre, setTitre] = useState(book?.titre ?? "");
-  const [auteur, setAuteur] = useState(book?.auteur ?? "");
-  const [editeur, setEditeur] = useState(book?.editeur ?? "");
-  const [annee, setAnnee] = useState(book ? String(book.annee) : "");
+
   const [couverture, setCouverture] = useState<string | null>(
     book?.couverture ?? null,
   );
   const [error, setError] = useState<AppError | null>(null);
   const [coverError, setCoverError] = useState<string | null>(null);
+
+  const {
+    control,
+    handleSubmit,
+    setError: setFieldError,
+    formState: { errors, isSubmitting },
+  } = useForm<FormData>({
+    defaultValues: {
+      titre: book?.titre ?? "",
+      auteur: book?.auteur ?? "",
+      editeur: book?.editeur ?? "",
+      annee: book ? String(book.annee) : "",
+    },
+  });
 
   const addCover = async () => {
     setCoverError(null);
@@ -57,26 +68,24 @@ export default function BookForm({ mode, book }: Props) {
     setCouverture(null);
   };
 
-  // Messages de validation renvoyes par l'API (422), par champ
-  const fieldError = (champ: string) =>
-    error?.type === "VALIDATION" ? error.fields[champ] : undefined;
-
-  const submit = async () => {
+  const onSubmit = async (data: FormData) => {
     setError(null);
-    const input = {
-      titre: titre.trim(),
-      auteur: auteur.trim(),
-      editeur: editeur.trim(),
-      annee: Number(annee),
+    const input: BookInput = {
+      titre: data.titre.trim(),
+      auteur: data.auteur.trim(),
+      editeur: data.editeur.trim(),
+      annee: Number(data.annee),
       lu: book?.lu,
       favori: book?.favori,
       couverture,
     };
+
     try {
       const saved =
         mode === "CREATE"
           ? await booksList.createBook(input)
           : await booksList.updateBook(book!.id, input, book!.version);
+
       if (mode === "CREATE") {
         booksContext?.addBookToList(saved);
       } else {
@@ -84,6 +93,18 @@ export default function BookForm({ mode, book }: Props) {
       }
       router.replace(`/books/${saved.id}`);
     } catch (err) {
+      if (isAppError(err) && err.type === "VALIDATION" && err.fields) {
+        Object.entries(err.fields).forEach(([field, message]) => {
+          if (
+            field === "titre" ||
+            field === "auteur" ||
+            field === "editeur" ||
+            field === "annee"
+          ) {
+            setFieldError(field as keyof FormData, { message });
+          }
+        });
+      }
       setError(
         isAppError(err)
           ? err
@@ -94,8 +115,8 @@ export default function BookForm({ mode, book }: Props) {
 
   return (
     <ScrollView
-      style={[styles.scroll, { backgroundColor: colors.background }]}
       contentContainerStyle={styles.container}
+      style={[styles.scroll, { backgroundColor: colors.background }]}
     >
       <View
         style={[
@@ -106,111 +127,126 @@ export default function BookForm({ mode, book }: Props) {
           },
         ]}
       >
-        <View style={styles.coverWrapper}>
-          <BookCover uri={couverture} />
-          <TouchableOpacity
-            style={[styles.coverButton, { backgroundColor: colors.primary }]}
-            onPress={addCover}
-            accessibilityRole="button"
-            accessibilityLabel={t("form.cover.add")}
-          >
-            <MaterialIcons name="add" size={22} color={colors.textOnPrimary} />
-          </TouchableOpacity>
-          {couverture && (
-            <TouchableOpacity
-              style={[
-                styles.coverButton,
-                styles.coverResetButton,
-                { backgroundColor: colors.danger },
-              ]}
-              onPress={resetCover}
-              accessibilityRole="button"
-              accessibilityLabel={t("form.cover.reset")}
-            >
-              <MaterialIcons
-                name="close"
-                size={18}
-                color={colors.textOnPrimary}
-              />
-            </TouchableOpacity>
-          )}
-          {(coverError || fieldError("couverture")) && (
-            <Text style={[styles.fieldError, { color: colors.danger }]}>
-              {coverError || fieldError("couverture")}
-            </Text>
-          )}
-        </View>
+        <BookFormCoverSection
+          coverError={coverError}
+          coverUri={couverture}
+          onAddCover={() => void addCover()}
+          onResetCover={resetCover}
+        />
+
         <View style={styles.info}>
           <Text style={[styles.heading, { color: colors.text }]}>
             {mode === "CREATE" ? t("form.createTitle") : t("form.updateTitle")}
           </Text>
+
           <Text style={[styles.label, { color: colors.text }]}>
             {t("form.title")}
           </Text>
-          <TextInput
-            style={[
-              styles.input,
-              { borderColor: colors.coverPlaceholder, color: colors.text },
-              fieldError("titre") && { borderColor: colors.danger },
-            ]}
-            value={titre}
-            onChangeText={setTitre}
+          <Controller
+            control={control}
+            name="titre"
+            render={({ field: { onChange, value } }) => (
+              <TextInput
+                onChangeText={onChange}
+                style={[
+                  styles.input,
+                  { borderColor: colors.coverPlaceholder, color: colors.text },
+                  errors.titre && { borderColor: colors.danger },
+                ]}
+                value={value}
+              />
+            )}
           />
-          {fieldError("titre") && (
-            <Text style={styles.fieldError}>{fieldError("titre")}</Text>
-          )}
+          {errors.titre?.message ? (
+            <Text style={[styles.fieldError, { color: colors.danger }]}>
+              {errors.titre.message}
+            </Text>
+          ) : null}
+
           <Text style={[styles.label, { color: colors.text }]}>
             {t("form.author")}
           </Text>
-          <TextInput
-            style={[
-              styles.input,
-              { borderColor: colors.coverPlaceholder, color: colors.text },
-              fieldError("auteur") && { borderColor: colors.danger },
-            ]}
-            value={auteur}
-            onChangeText={setAuteur}
+          <Controller
+            control={control}
+            name="auteur"
+            render={({ field: { onChange, value } }) => (
+              <TextInput
+                onChangeText={onChange}
+                style={[
+                  styles.input,
+                  { borderColor: colors.coverPlaceholder, color: colors.text },
+                  errors.auteur && { borderColor: colors.danger },
+                ]}
+                value={value}
+              />
+            )}
           />
-          {fieldError("auteur") && (
-            <Text style={styles.fieldError}>{fieldError("auteur")}</Text>
-          )}
+          {errors.auteur?.message ? (
+            <Text style={[styles.fieldError, { color: colors.danger }]}>
+              {errors.auteur.message}
+            </Text>
+          ) : null}
+
           <Text style={[styles.label, { color: colors.text }]}>
             {t("form.publisher")}
           </Text>
-          <TextInput
-            style={[
-              styles.input,
-              { borderColor: colors.coverPlaceholder, color: colors.text },
-              fieldError("editeur") && { borderColor: colors.danger },
-            ]}
-            value={editeur}
-            onChangeText={setEditeur}
+          <Controller
+            control={control}
+            name="editeur"
+            render={({ field: { onChange, value } }) => (
+              <TextInput
+                onChangeText={onChange}
+                style={[
+                  styles.input,
+                  { borderColor: colors.coverPlaceholder, color: colors.text },
+                  errors.editeur && { borderColor: colors.danger },
+                ]}
+                value={value}
+              />
+            )}
           />
-          {fieldError("editeur") && (
-            <Text style={styles.fieldError}>{fieldError("editeur")}</Text>
-          )}
+          {errors.editeur?.message ? (
+            <Text style={[styles.fieldError, { color: colors.danger }]}>
+              {errors.editeur.message}
+            </Text>
+          ) : null}
+
           <Text style={[styles.label, { color: colors.text }]}>
             {t("form.year")}
           </Text>
-          <TextInput
-            style={[
-              styles.input,
-              { borderColor: colors.coverPlaceholder, color: colors.text },
-              fieldError("annee") && { borderColor: colors.danger },
-            ]}
-            value={annee}
-            onChangeText={setAnnee}
-            keyboardType="numeric"
+          <Controller
+            control={control}
+            name="annee"
+            render={({ field: { onChange, value } }) => (
+              <TextInput
+                keyboardType="numeric"
+                onChangeText={onChange}
+                style={[
+                  styles.input,
+                  { borderColor: colors.coverPlaceholder, color: colors.text },
+                  errors.annee && { borderColor: colors.danger },
+                ]}
+                value={value}
+              />
+            )}
           />
-          {fieldError("annee") && (
-            <Text style={styles.fieldError}>{fieldError("annee")}</Text>
-          )}
-          {error && error.type !== "VALIDATION" && (
+          {errors.annee?.message ? (
+            <Text style={[styles.fieldError, { color: colors.danger }]}>
+              {errors.annee.message}
+            </Text>
+          ) : null}
+
+          {error && error.type !== "VALIDATION" ? (
             <Text style={[styles.error, { color: colors.danger }]}>
               {error.message}
             </Text>
-          )}
-          <SaveButton onPress={submit} label={t("form.save")} />
+          ) : null}
+
+          <SaveButton
+            disabled={isSubmitting}
+            label={t("form.save")}
+            onPress={handleSubmit(onSubmit)}
+          />
         </View>
       </View>
     </ScrollView>
@@ -218,13 +254,6 @@ export default function BookForm({ mode, book }: Props) {
 }
 
 const styles = StyleSheet.create({
-  scroll: {
-    flex: 1,
-  },
-  container: {
-    flexGrow: 1,
-    padding: spacing.lg,
-  },
   card: {
     alignItems: "flex-start",
     borderRadius: 8,
@@ -234,41 +263,9 @@ const styles = StyleSheet.create({
     gap: spacing.lg,
     padding: spacing.lg,
   },
-  coverWrapper: {
-    position: "relative",
-    width: 200,
-  },
-  coverButton: {
-    alignItems: "center",
-    borderRadius: 20,
-    bottom: spacing.md,
-    height: 40,
-    justifyContent: "center",
-    position: "absolute",
-    right: spacing.md,
-    width: 40,
-  },
-  coverResetButton: {
-    bottom: spacing.md + 48,
-  },
-  info: {
-    flex: 1,
-  },
-  heading: {
-    fontSize: typography.title,
-    fontWeight: "700",
-    marginBottom: spacing.lg,
-  },
-  label: {
-    fontSize: typography.body,
-    marginBottom: spacing.md,
-  },
-  input: {
-    borderRadius: 8,
-    borderWidth: 1,
-    fontSize: typography.body,
-    marginBottom: spacing.md,
-    padding: spacing.md,
+  container: {
+    flexGrow: 1,
+    padding: spacing.lg,
   },
   error: {
     fontSize: typography.body,
@@ -277,5 +274,27 @@ const styles = StyleSheet.create({
   fieldError: {
     fontSize: typography.body,
     marginBottom: spacing.md,
+  },
+  heading: {
+    fontSize: typography.title,
+    fontWeight: "700",
+    marginBottom: spacing.lg,
+  },
+  info: {
+    flex: 1,
+  },
+  input: {
+    borderRadius: 8,
+    borderWidth: 1,
+    fontSize: typography.body,
+    marginBottom: spacing.md,
+    padding: spacing.md,
+  },
+  label: {
+    fontSize: typography.body,
+    marginBottom: spacing.md,
+  },
+  scroll: {
+    flex: 1,
   },
 });

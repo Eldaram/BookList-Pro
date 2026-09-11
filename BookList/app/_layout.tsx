@@ -7,6 +7,7 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
 
+import ErrorBoundary from "../components/ErrorBoundary";
 import LoginForm from "../components/auth/LoginForm";
 import UserMenu from "../components/auth/UserMenu";
 import I18nSelector from "../components/i18n/i18n";
@@ -59,15 +60,17 @@ function ThemedApp() {
 
 export default function RootLayout() {
   return (
-    <ThemeProvider>
-      <I18nProvider>
-        <AuthProvider>
-          <BooksProvider>
-            <ThemedApp />
-          </BooksProvider>
-        </AuthProvider>
-      </I18nProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <I18nProvider>
+          <AuthProvider>
+            <BooksProvider>
+              <ThemedApp />
+            </BooksProvider>
+          </AuthProvider>
+        </I18nProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }
 

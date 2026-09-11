@@ -5,8 +5,6 @@ import {
 } from "../services/api/openLibraryApi";
 import { useDebouncedValue } from "./useDebouncedValue";
 
-// Enrichissement OpenLibrary d'une fiche : jamais d'etat erreur,
-// l'indisponibilite se traduit par enrichment=null (degradation silencieuse).
 export function useOpenLibrary(titre: string | undefined) {
   const [enrichment, setEnrichment] = useState<OpenLibraryEnrichment | null>(
     null,
@@ -15,9 +13,22 @@ export function useOpenLibrary(titre: string | undefined) {
   const debouncedTitre = useDebouncedValue(titre);
 
   useEffect(() => {
-    if (!debouncedTitre) return;
     let cancelled = false;
-    setLoading(true);
+
+    if (!debouncedTitre) {
+      Promise.resolve().then(() => {
+        if (!cancelled) {
+          setEnrichment(null);
+          setLoading(false);
+        }
+      });
+      return;
+    }
+
+    Promise.resolve().then(() => {
+      if (!cancelled) setLoading(true);
+    });
+
     searchByTitle(debouncedTitre)
       .then((result) => {
         if (!cancelled) setEnrichment(result);
@@ -25,6 +36,7 @@ export function useOpenLibrary(titre: string | undefined) {
       .finally(() => {
         if (!cancelled) setLoading(false);
       });
+
     return () => {
       cancelled = true;
     };

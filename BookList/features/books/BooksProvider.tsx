@@ -70,7 +70,6 @@ export function BooksProvider({ children }: { children: React.ReactNode }) {
   const [filters, setFiltersState] = useState<BookListFilters>({});
 
   const filtersRef = useRef<BookListFilters>({});
-  const abortRef = useRef<AbortController | null>(null);
   const pageRef = useRef(page);
   const hasMoreRef = useRef(hasMore);
   const loadingRef = useRef(loading);
@@ -139,19 +138,10 @@ export function BooksProvider({ children }: { children: React.ReactNode }) {
           limit: DEFAULT_LIMIT,
         });
         if (ignore) return;
-        replaceCachedBooks(response.items);
-        setBooks(response.items);
-        setPage(response.page);
-        setTotalPages(response.totalPages);
-        setTotal(response.total);
-        setHasMore(response.page < response.totalPages);
+        applyPage(response, false);
       } catch (err) {
         if (ignore) return;
-        setError(
-          isAppError(err)
-            ? err
-            : { type: "NETWORK", message: "Unexpected error", cause: err },
-        );
+        setError(toAppError(err));
       } finally {
         if (!ignore) setLoading(false);
       }
@@ -172,7 +162,7 @@ export function BooksProvider({ children }: { children: React.ReactNode }) {
       ignore = true;
       unsubscribe();
     };
-  }, []);
+  }, [applyPage]);
 
   const fetchNextPage = useCallback(async () => {
     if (
@@ -203,9 +193,7 @@ export function BooksProvider({ children }: { children: React.ReactNode }) {
   }, [applyPage]);
 
   const refresh = useCallback(async () => {
-    if (refreshingRef.current) {
-      return;
-    }
+    if (refreshingRef.current) return;
     refreshingRef.current = true;
     setRefreshing(true);
     setError(null);
