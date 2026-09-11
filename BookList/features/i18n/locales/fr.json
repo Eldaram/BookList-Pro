@@ -100,6 +100,9 @@
     "logout": "Déconnexion",
     "userRole": "Rôle : {{role}}",
     "sessionExpired": "Votre session a expiré. Veuillez vous reconnecter.",
-    "invalidCredentials": "Email ou mot de passe incorrect."
+    "invalidCredentials": "Email ou mot de passe incorrect.",
+    "emailRequired": "L'email est requis.",
+    "emailInvalid": "Veuillez entrer une adresse email valide.",
+    "passwordRequired": "Le mot de passe est requis."
   }
 }

@@ -9,7 +9,10 @@ import {
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "../../features/auth/AuthProvider";
-import { LoginFormData, loginSchema } from "../../features/auth/authFormSchema";
+import {
+  createLoginSchema,
+  LoginFormData,
+} from "../../features/auth/authFormSchema";
 import { useI18n } from "../../features/i18n/I18nProvider";
 import { useTheme } from "../../features/theme/ThemeProvider";
 import { spacing } from "../../theme/tokens";
@@ -27,7 +30,7 @@ export default function LoginForm() {
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
+    resolver: zodResolver(createLoginSchema(t)),
     defaultValues: { email: "", password: "" },
   });
 

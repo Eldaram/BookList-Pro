@@ -2,8 +2,11 @@ import { Book } from "../../domain/book";
 import { booksList } from "./booksList";
 import { patchCachedBook, upsertCachedBook } from "./booksCache";
 
-// Bascule optimiste : le cache change instantanement (liste et fiche via les
-// abonnes), puis PATCH partiel vers l'API ; retour arriere si elle refuse.
+/**
+ * Performs an optimistic toggle of a book flag ('favori' or 'lu').
+ * Updates the in-memory cache immediately for a responsive UI,
+ * sends a partial PATCH to the API, and rolls back if rejected.
+ */
 async function toggleBookFlag(
   book: Book,
   field: "favori" | "lu",
