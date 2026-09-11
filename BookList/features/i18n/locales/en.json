@@ -18,6 +18,7 @@
     "details": "Book details",
     "form": "Book form",
     "empty": "No books yet",
+    "notFound": "Book not found.",
     "loading": "Loading books…",
     "loadingMore": "Loading more books…",
     "allLoaded": "All books loaded",

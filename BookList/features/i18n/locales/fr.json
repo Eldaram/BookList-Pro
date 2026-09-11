@@ -18,6 +18,7 @@
     "details": "Détail du livre",
     "form": "Formulaire livre",
     "empty": "Aucun livre pour le moment",
+    "notFound": "Livre introuvable.",
     "loading": "Chargement des livres…",
     "loadingMore": "Chargement de la suite…",
     "allLoaded": "Tous les livres sont chargés",

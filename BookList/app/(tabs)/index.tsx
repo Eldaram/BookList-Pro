@@ -1,4 +1,3 @@
-import { StatusBar } from "expo-status-bar";
 import { StyleSheet, View } from "react-native";
 import BookList from "../../components/books/BookList";
 import BookToolbar from "../../components/books/BookToolbar";
@@ -12,7 +11,6 @@ export default function BooksScreen() {
     <View style={styles.container}>
       <BookToolbar filters={filters} onChange={setFilters} />
       <BookList />
-      <StatusBar style="auto" />
     </View>
   );
 }
