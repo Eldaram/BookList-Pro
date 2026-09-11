@@ -1,9 +1,9 @@
-import { authService } from "../services/auth/authService";
-import * as authApi from "../services/api/authApi";
-import { secureStorage } from "../services/secureStorage";
+import { authService } from "../../../services/auth/authService";
+import * as authApi from "../../../services/api/authApi";
+import { secureStorage } from "../../../services/secureStorage";
 
-jest.mock("../services/api/authApi");
-jest.mock("../services/secureStorage");
+jest.mock("../../../services/api/authApi");
+jest.mock("../../../services/secureStorage");
 
 describe("AuthService Suite", () => {
   beforeEach(() => {

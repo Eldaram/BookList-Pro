@@ -1,5 +1,5 @@
-import { httpClient } from "../services/api/httpClient";
-import { authService } from "../services/auth/authService";
+import { httpClient } from "../../../services/api/httpClient";
+import { authService } from "../../../services/auth/authService";
 import { z } from "zod";
 
 const globalFetch = global.fetch;
